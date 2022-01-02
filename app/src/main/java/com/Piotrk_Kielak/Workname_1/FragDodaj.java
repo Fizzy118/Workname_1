@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import io.realm.mongodb.User;
 
@@ -20,7 +21,7 @@ import io.realm.mongodb.User;
 public class FragDodaj extends Fragment {
 
     private User user;
-
+    private Button button;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -51,22 +52,6 @@ public class FragDodaj extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-
-        this.user = MainActivity.myApp.currentUser();
-        Intent intent = new Intent(getContext(), LogActivity.class);
-        this.startActivity(intent);
-        if (this.user == null){
-
-
-        }
-        else{
-
-        }
-    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,12 +62,39 @@ public class FragDodaj extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+
     }
+//    @Override
+//    public void onStart(){
+//        super.onStart();
+//
+//        this.user = MainActivity.myApp.currentUser();
+//
+//        if (this.user == null){
+//            Intent intent = new Intent(getContext(), LogActivity.class);
+//            this.startActivity(intent);
+//
+//        }
+//        else{
+//
+//        }
+//    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_frag_dodaj, container, false);
+
+        View v = inflater.inflate(R.layout.fragment_frag_dodaj,container,false);
+        button= v.findViewById(R.id.button23);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), Zaproszenia.class);
+                startActivity(intent);
+            }
+        });
+        return v;
     }
 }

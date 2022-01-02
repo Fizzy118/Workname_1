@@ -25,9 +25,9 @@ public class RegActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reg);
 
         radioGroup=findViewById(R.id.radioGroup);
-        editTextPhonereg=findViewById(R.id.editTextPhonereg);
-        textpseudonimreg=findViewById(R.id.textpseudonimreg);
-        hasłoreg=findViewById(R.id.hasłoreg);
+        editTextPhonereg=findViewById(R.id.nrReg);
+        textpseudonimreg=findViewById(R.id.nickReg);
+        hasłoreg=findViewById(R.id.hasłolog);
 
         buttonreg1.setOnClickListener(new View.OnClickListener() {
             @Override

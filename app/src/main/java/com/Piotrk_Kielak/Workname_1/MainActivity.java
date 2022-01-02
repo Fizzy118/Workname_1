@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomNavigationView bottomNav;
     private NavController navController;
+
     //App myApp;
 
     //String TAG = MainActivity.class.getSimpleName();

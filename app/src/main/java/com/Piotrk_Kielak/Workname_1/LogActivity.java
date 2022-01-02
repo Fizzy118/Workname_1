@@ -2,10 +2,9 @@ package com.Piotrk_Kielak.Workname_1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.renderscript.ScriptIntrinsic;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,10 +28,11 @@ public class LogActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
 
-        numer=findViewById(R.id.editTextPhonelog);
-        haslo=findViewById(R.id.hasłolog);
         zaloguj=findViewById(R.id.buttonlog1);
         zarejestruj=findViewById(R.id.buttonlog2);
+
+        haslo=findViewById(R.id.hasloll);
+        numer=findViewById(R.id.phonelog);
 
         zaloguj.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +40,7 @@ public class LogActivity extends AppCompatActivity{
                 LogActivity.this.login();
             }
         });
+
         zarejestruj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
