@@ -1,4 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/fragDodaj"
+        android:icon="@drawable/ic_add"
+        android:title="Dodaj" />
+
+    <item
+        android:id="@+id/fragProfil"
+        android:icon="@drawable/ic_profile"
+        android:title="Profil" />
+
+    <item
+        android:id="@+id/fragTablica"
+        android:icon="@drawable/ic_home"
+        android:title="Tablica" />
+
+    <item
+        android:id="@+id/fragUstawienia"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="Ustawienia" />
+
+    <item
+        android:id="@+id/fragInfo"
+        android:icon="@drawable/ic_baseline_info_24"
+        android:title="O aplikacji" />
+
 </menu>

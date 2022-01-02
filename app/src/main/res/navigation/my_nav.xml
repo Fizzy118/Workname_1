@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/my_nav">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/fragDodaj">
+    <fragment
+        android:id="@+id/fragDodaj"
+        android:name="com.Piotrk_Kielak.Workname_1.FragDodaj"
+        android:label="fragment_frag_dodaj"
+        tools:layout="@layout/fragment_frag_dodaj" />
+    <fragment
+        android:id="@+id/fragProfil"
+        android:name="com.Piotrk_Kielak.Workname_1.FragProfil"
+        android:label="fragment_frag_profil"
+        tools:layout="@layout/fragment_frag_profil" />
+    <fragment
+        android:id="@+id/fragTablica"
+        android:name="com.Piotrk_Kielak.Workname_1.FragTablica"
+        android:label="fragment_frag_tablica"
+        tools:layout="@layout/fragment_frag_tablica" />
+    <fragment
+        android:id="@+id/fragUstawienia"
+        android:name="com.Piotrk_Kielak.Workname_1.FragUstawienia"
+        android:label="fragment_frag_ustawienia"
+        tools:layout="@layout/fragment_frag_ustawienia" />
+    <fragment
+        android:id="@+id/fragInfo"
+        android:name="com.Piotrk_Kielak.Workname_1.FragInfo"
+        android:label="fragment_frag_info"
+        tools:layout="@layout/fragment_frag_info" />
 </navigation>

@@ -1,12 +1,16 @@
 package com.Piotrk_Kielak.Workname_1;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-
+import android.content.Intent;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import io.realm.mongodb.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +18,8 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class FragDodaj extends Fragment {
+
+    private User user;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -47,12 +53,30 @@ public class FragDodaj extends Fragment {
     }
 
     @Override
+    public void onStart(){
+        super.onStart();
+
+        this.user = MainActivity.myApp.currentUser();
+        Intent intent = new Intent(getContext(), LogActivity.class);
+        this.startActivity(intent);
+        if (this.user == null){
+
+
+        }
+        else{
+
+        }
+    }
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
