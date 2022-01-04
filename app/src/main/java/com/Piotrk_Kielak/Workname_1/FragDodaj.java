@@ -64,21 +64,21 @@ public class FragDodaj extends Fragment {
 
 
     }
-//    @Override
-//    public void onStart(){
-//        super.onStart();
-//
-//        this.user = MainActivity.myApp.currentUser();
-//
-//        if (this.user == null){
-//            Intent intent = new Intent(getContext(), LogActivity.class);
-//            this.startActivity(intent);
-//
-//        }
-//        else{
-//
-//        }
-//    }
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        this.user = MainActivity.myApp.currentUser();
+
+        if (this.user == null){
+            Intent intent = new Intent(getContext(), LogActivity.class);
+            this.startActivity(intent);
+
+        }
+        else{
+
+        }
+    }
 
 
     @Override

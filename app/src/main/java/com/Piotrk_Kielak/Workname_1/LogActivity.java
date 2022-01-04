@@ -67,7 +67,12 @@ public class LogActivity extends AppCompatActivity{
     }
 
 
+
     private void login(){
+        if(numer.getText().toString().isEmpty() || haslo.getText().toString().isEmpty()){
+            onLoginFailed("Zły numer lub hasło");
+            return;
+        }
     zaloguj.setEnabled(false);
     zarejestruj.setEnabled(false);
 
