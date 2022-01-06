@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.content.Intent;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
 
+import io.realm.Realm;
 import io.realm.mongodb.User;
+import io.realm.mongodb.sync.SyncConfiguration;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -20,8 +24,13 @@ import io.realm.mongodb.User;
  */
 public class FragDodaj extends Fragment {
 
-    private User user;
+    private Realm userRealm;
+    private Realm projectRealm;
+    private RecyclerView recyclerView;
+    private Adapter adapter;
+    private io.realm.mongodb.User user = null;
     private Button button;
+    private String partition;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -67,20 +76,38 @@ public class FragDodaj extends Fragment {
     @Override
     public void onStart(){
         super.onStart();
-
-        this.user = MainActivity.myApp.currentUser();
-
-        if (this.user == null){
+        user = MainActivity.myApp.currentUser();
+        //jesli nikt nie jest zalogowany, zacznij od logowania
+        if (user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
 
         }
         else{
-
+//            Realm.getInstanceAsync(SyncConfiguration.Builder(user!!,partition), new Realm.Callback{
+//                @Override
+//                       public void onSuccess(Realm realm){
+//                    this.projectRealm = realm;
+//                    setUpRecycledView(realm, user, partition)
+//                }
+//            })
         }
     }
 
+//    @Override
+//    protected void onStop(){
+//        super.onStop();
+//        user.run{
+//            projectRealm.close();
+//        }
+//}
 
+//    @Override
+//    public void onDestroy(){
+//        super.onDestroy();
+//       // recyclerView.;
+//        projectRealm.close();
+//    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

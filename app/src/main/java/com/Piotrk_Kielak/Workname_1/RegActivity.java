@@ -12,6 +12,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.Piotrk_Kielak.Workname_1.Model.User;
+
 import io.realm.mongodb.App;
 import io.realm.mongodb.Credentials;
 
@@ -58,6 +60,8 @@ public class RegActivity extends AppCompatActivity {
         // Log.e(TAG(), errormsg);
         Toast.makeText(this.getBaseContext(), errormsg, Toast.LENGTH_LONG).show();
     }
+
+    //funkcja sprawdza czy radiobutton jest zaznaczony
     public boolean checked(RadioButton r1, RadioButton r2){
         if(r1.isChecked() || r2.isChecked()) {
             return false;
@@ -68,6 +72,7 @@ public class RegActivity extends AppCompatActivity {
         }
     }
 
+    //funkcja rejestrujaca uzytkownika
     private void reg(){
 
         if(editTextPhonereg.getText().toString().isEmpty() || hasłoreg.getText().toString().isEmpty() || textpseudonimreg.getText().toString().isEmpty() || checked(radio1, radio2)){
@@ -91,6 +96,10 @@ public class RegActivity extends AppCompatActivity {
                     Log.e("Reg activity", "Nie udało się zarejestrować");
                 } else {
                     Log.i("Reg activity", "Zarejestrowano");
+                    User user = new User();
+                    //user=MainActivity.myApp.currentUser();
+                    user.setNick(textpseudonimreg.getText().toString());
+                    user.setTyp(radio1.isChecked());
                 }
             }
         });

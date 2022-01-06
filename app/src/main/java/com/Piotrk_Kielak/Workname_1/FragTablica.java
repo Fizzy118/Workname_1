@@ -1,12 +1,31 @@
 package com.Piotrk_Kielak.Workname_1;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-
+import io.realm.OrderedCollectionChangeSet;
+import io.realm.OrderedRealmCollectionChangeListener;
+import io.realm.RealmList;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+import io.realm.mongodb.User;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.Piotrk_Kielak.Workname_1.Model.Opieka;
+import com.Piotrk_Kielak.Workname_1.Model.OpiekaAdapter;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.mongodb.sync.SyncConfiguration;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -15,6 +34,10 @@ import android.view.ViewGroup;
  */
 public class FragTablica extends Fragment {
 
+    private io.realm.mongodb.User user;
+    private Realm userRealm;
+    private RecyclerView recyclerView;
+    private OpiekaAdapter adapter;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -49,16 +72,72 @@ public class FragTablica extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_frag_tablica, container, false);
+
+        View v = inflater.inflate(R.layout.fragment_frag_tablica,container,false);
+        recyclerView= v.findViewById(R.id.button23);
+        return v;
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        this.user = MainActivity.myApp.currentUser();
+        //jesli nikt nie jest zalogowany, zacznij od logowania
+        if (this.user == null){
+            Intent intent = new Intent(getContext(), LogActivity.class);
+            this.startActivity(intent);
+        }
+        else{
+            StringBuilder b= new StringBuilder().append("user=");
+        SyncConfiguration config = new SyncConfiguration.Builder(this.user, b.append(this.user.getId()).toString()).build();
+        Realm.getInstanceAsync(config, new Realm.Callback() {
+            @Override
+            public void onSuccess(Realm realm) {
+                FragTablica.this.userRealm = realm;
+                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpeka(realm));
+            }
+        });
+        }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        if(this.userRealm != null){
+            userRealm.close();
+        }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(this.userRealm != null){
+            userRealm.close();
+        }
+        this.recyclerView.setAdapter((RecyclerView.Adapter) null);
+    }
+
+    private RealmList getOpeka(Realm realm){
+        RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
+       com.Piotrk_Kielak.Workname_1.Model.User syncedUser = syncedUsers;
+        return syncedUser.getPolaczenie();
+
+    }
+    private void setUpRecyclerView(RealmList<Opieka> opiekaList){
+    this.adapter=new OpiekaAdapter(opiekaList,this.user);
+    this.recyclerView.setLayoutManager((RecyclerView.LayoutManager) (new LinearLayoutManager(this)));
+
+    this.recyclerView.setAdapter(this.adapter);
+
     }
 }

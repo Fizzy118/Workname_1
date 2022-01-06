@@ -36,27 +36,23 @@ public class MainActivity extends AppCompatActivity {
 
     //App myApp;
 
-    //String TAG = MainActivity.class.getSimpleName();
-    //  Intrinsics.checkNotNullExpressionValue(TAG(), "T::class.java.simpleName");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //inicjalizacja realm app
         Realm.init(this);
         myApp = new App(new AppConfiguration.Builder(Appid).build());
         //defaultSyncErrorHandler(Session, error ->Log.e(TAG(), "Sync error: ${error.errorMessage}")).
-        // Enable more logging in debug mode
-        if (BuildConfig.DEBUG) {
-            RealmLog.setLevel(LogLevel.ALL);
-        }
        // Log.v(TAG(), "Initialized the Realm App configuration for: ${taskApp.configuration.appId}");
 
 
-
+        //implementacja gornego paska
         toolbar=findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
+        //implementacja dolnego menu
         bottomNav = findViewById(R.id.bottomNavigationView);
         navController = Navigation.findNavController(this,  R.id.fragmentContainerView2);
         NavigationUI.setupWithNavController(bottomNav, navController);

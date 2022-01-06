@@ -19,7 +19,7 @@ import io.realm.mongodb.User;
  */
 public class FragProfil extends Fragment {
 
-    private User user;
+    private io.realm.mongodb.User user = null;
     private Realm userRealm;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
