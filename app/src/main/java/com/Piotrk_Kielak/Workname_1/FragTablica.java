@@ -10,6 +10,7 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.mongodb.User;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -104,7 +105,7 @@ public class FragTablica extends Fragment {
             @Override
             public void onSuccess(Realm realm) {
                 FragTablica.this.userRealm = realm;
-                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpeka(realm));
+                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpieka(realm));
             }
         });
         }
@@ -127,17 +128,17 @@ public class FragTablica extends Fragment {
         this.recyclerView.setAdapter((RecyclerView.Adapter) null);
     }
 
-    private RealmList getOpeka(Realm realm){
+    private RealmList getOpieka(Realm realm){
         RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
        com.Piotrk_Kielak.Workname_1.Model.User syncedUser = syncedUsers;
         return syncedUser.getPolaczenie();
 
     }
-    private void setUpRecyclerView(RealmList<Opieka> opiekaList){
-    this.adapter=new OpiekaAdapter(opiekaList,this.user);
-    this.recyclerView.setLayoutManager((RecyclerView.LayoutManager) (new LinearLayoutManager(this)));
-
+    private void setUpRecyclerView(RealmList opiekaList){
+    this.adapter=new OpiekaAdapter(opiekaList, this.user);
+    this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     this.recyclerView.setAdapter(this.adapter);
-
+    this.recyclerView.setHasFixedSize(true);
+    this.recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),1));
     }
 }
