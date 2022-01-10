@@ -2,19 +2,35 @@ package com.Piotrk_Kielak.Workname_1;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
+
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import org.bson.Document;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
 
 import io.realm.Realm;
+import io.realm.mongodb.App;
 import io.realm.mongodb.User;
+import io.realm.mongodb.functions.Functions;
 import io.realm.mongodb.sync.SyncConfiguration;
 
 /**
@@ -28,8 +44,10 @@ public class FragDodaj extends Fragment {
     private Realm projectRealm;
     private RecyclerView recyclerView;
     private Adapter adapter;
-    private io.realm.mongodb.User user = null;
+    private User user = null;
     private Button button;
+    private ImageButton button2;
+    private EditText editText;
     private String partition;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -84,6 +102,8 @@ public class FragDodaj extends Fragment {
 
         }
         else{
+
+            Log.i(user.getId(),"wiad");
 //            Realm.getInstanceAsync(SyncConfiguration.Builder(user!!,partition), new Realm.Callback{
 //                @Override
 //                       public void onSuccess(Realm realm){
@@ -115,13 +135,33 @@ public class FragDodaj extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_frag_dodaj,container,false);
         button= v.findViewById(R.id.button23);
+        editText=v.findViewById(R.id.textinputedittext);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), Zaproszenia.class);
                 startActivity(intent);
+
             }
         });
+        button2 = v.findViewById(R.id.imageButton);
+        button2.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Functions functionsManager =MainActivity.myApp.getFunctions(user);
+                List<String> myList = Arrays.asList(editText.getText().toString());
+                functionsManager.callFunctionAsync("DodajOsobe", myList,Document.class, (App.Callback) result -> {
+                  if(result.isSuccess()){
+                        Log.v("TAG()", "dodano"+ (Document)result.get());
+                    }
+                    else{
+                        Log.v("TAG()", "niedodano"+ result.getError());
+                      Toast.makeText(getContext(), "Zły numer", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }));
         return v;
     }
 }

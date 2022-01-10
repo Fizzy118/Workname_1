@@ -11,18 +11,23 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.os.Handler;
+import org.bson.Document;
 
-import com.Piotrk_Kielak.Workname_1.Model.User;
+import java.util.Arrays;
+import java.util.List;
 
 import io.realm.mongodb.App;
 import io.realm.mongodb.Credentials;
+import io.realm.mongodb.User;
+import io.realm.mongodb.functions.Functions;
 
 public class RegActivity extends AppCompatActivity {
-    RadioGroup radioGroup;
+     RadioGroup radioGroup;
     RadioButton radio1, radio2;
     EditText editTextPhonereg, textpseudonimreg, hasłoreg;
     Button zarejestruj, logowanie;
-
+    private User user = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +41,6 @@ public class RegActivity extends AppCompatActivity {
         hasłoreg=findViewById(R.id.hasloReg);
         logowanie=findViewById(R.id.buttonreg2);
         zarejestruj=findViewById(R.id.buttonreg1);
-
         logowanie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,6 +75,36 @@ public class RegActivity extends AppCompatActivity {
             return true;
         }
     }
+    private final void onLoginSuccess(){
+        // successful login ends this activity, bringing the user back to the project activity
+        RegActivity.this.addDocument();
+        this.finish();
+        Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getBaseContext(), FragDodaj.class); //zmienic na frag_tablice
+        startActivity(intent);
+    }
+
+    private final void onLoginFailed(String errormsg) {
+        // Log.e(TAG(), errormsg);
+        Toast.makeText(this.getBaseContext(), errormsg, Toast.LENGTH_LONG).show();
+    }
+
+    private void addDocument(){
+        if(radio2.isChecked()){
+            user = MainActivity.myApp.currentUser();
+            Functions functionsManager =MainActivity.myApp.getFunctions(user);
+            List<String> myList = Arrays.asList(textpseudonimreg.getText().toString());
+            functionsManager.callFunctionAsync("NowyDokument", myList,Document.class, (App.Callback) result -> {
+                if(result.isSuccess()){
+                    Log.v("TAG()", "utworzono"+ (Document)result.get());
+
+                }
+                else{
+                    Log.v("TAG()", "nie utworzono"+ result.getError());
+                }
+            });
+        }
+    }
 
     //funkcja rejestrujaca uzytkownika
     private void reg(){
@@ -94,12 +128,24 @@ public class RegActivity extends AppCompatActivity {
                 if (!result.isSuccess()) {
                     RegActivity.this.onRegFailed(result.getError().getErrorMessage());
                     Log.e("Reg activity", "Nie udało się zarejestrować");
+                    Log.v("TAG()", "nie utworzono"+ result.getError());
                 } else {
                     Log.i("Reg activity", "Zarejestrowano");
-                    User user = new User();
-                    //user=MainActivity.myApp.currentUser();
-                    user.setNick(textpseudonimreg.getText().toString());
-                    user.setTyp(radio1.isChecked());
+                    Intent intent = new Intent(getBaseContext(), LogActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(getBaseContext(),"Zarejestrowano",Toast.LENGTH_LONG).show();
+                    Credentials creds = Credentials.emailPassword(num, has);
+                    MainActivity.myApp.loginAsync(creds, new App.Callback<User>() {
+                        @Override
+                        public void onResult(App.Result<User> result) {
+                            if (!result.isSuccess()) {
+                                RegActivity.this.onLoginFailed(result.getError().getErrorMessage());
+                            } else {
+                                RegActivity.this.onLoginSuccess();
+                            }
+                        }
+                    });
+
                 }
             }
         });

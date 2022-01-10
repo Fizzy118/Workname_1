@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,8 +36,8 @@ import io.realm.mongodb.sync.SyncConfiguration;
  */
 public class FragTablica extends Fragment {
 
-    private io.realm.mongodb.User user;
-    private Realm userRealm;
+    private User user;
+    private Realm userRealm=null;
     private RecyclerView recyclerView;
     private OpiekaAdapter adapter;
     // TODO: Rename parameter arguments, choose names that match
@@ -99,8 +100,11 @@ public class FragTablica extends Fragment {
             this.startActivity(intent);
         }
         else{
+            Log.e("pep", "blad 3");
             StringBuilder b= new StringBuilder().append("user=");
+            //blad
         SyncConfiguration config = new SyncConfiguration.Builder(this.user, b.append(this.user.getId()).toString()).build();
+            Log.e("pep", "blad 4");
         Realm.getInstanceAsync(config, new Realm.Callback() {
             @Override
             public void onSuccess(Realm realm) {
@@ -130,12 +134,14 @@ public class FragTablica extends Fragment {
 
     private RealmList getOpieka(Realm realm){
         RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
-       com.Piotrk_Kielak.Workname_1.Model.User syncedUser = syncedUsers;
+        com.Piotrk_Kielak.Workname_1.Model.User syncedUser = (com.Piotrk_Kielak.Workname_1.Model.User) syncedUsers.get(0);
+        Log.e("pep", "blad 2");
         return syncedUser.getPolaczenie();
 
     }
     private void setUpRecyclerView(RealmList opiekaList){
-    this.adapter=new OpiekaAdapter(opiekaList, this.user);
+
+    this.adapter=new OpiekaAdapter(opiekaList,this.adapter.getUser());
     this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     this.recyclerView.setAdapter(this.adapter);
     this.recyclerView.setHasFixedSize(true);

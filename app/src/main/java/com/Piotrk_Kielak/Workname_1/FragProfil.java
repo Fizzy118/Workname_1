@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,7 @@ import io.realm.mongodb.User;
  */
 public class FragProfil extends Fragment {
 
-    private io.realm.mongodb.User user = null;
+    private User user = null;
     private Realm userRealm;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -70,10 +71,9 @@ public class FragProfil extends Fragment {
         if (this.user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
-
         }
         else{
-
+        //Log.e("Tag",user.get);
         }
     }
 
