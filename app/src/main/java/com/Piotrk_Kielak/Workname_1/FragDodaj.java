@@ -49,6 +49,7 @@ public class FragDodaj extends Fragment {
     private ImageButton button2;
     private EditText editText;
     private String partition;
+    private Boolean typ;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -99,7 +100,6 @@ public class FragDodaj extends Fragment {
         if (user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
-
         }
         else{
 
@@ -136,41 +136,80 @@ public class FragDodaj extends Fragment {
         View v = inflater.inflate(R.layout.fragment_frag_dodaj,container,false);
         button= v.findViewById(R.id.button23);
         editText=v.findViewById(R.id.textinputedittext);
+        ///////////////////////////////////////////////////////////////////////////////test
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                Intent intent = new Intent(getContext(), Zaproszenia.class);
 //                startActivity(intent);
-                Functions functionsManager =MainActivity.myApp.getFunctions(user);
-                List<String> myList = Arrays.asList("tomek","21372137");
-                functionsManager.callFunctionAsync("getTyp", myList,Boolean.class, (App.Callback) result -> {
-                    if(result.isSuccess()){
-                        Log.v("TAG()", "zmieniono dane "+ (Boolean)result.get());
-                    }
-                    else{
-                        Log.v("TAG()", "niedodano"+ result.getError());
-                        Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
-                    }
-                });
-
+                    Functions functionsManager = MainActivity.myApp.getFunctions(user);
+                    List<String> myList = Arrays.asList("tomek", "21372137");
+                    functionsManager.callFunctionAsync("getTyp", myList, Boolean.class, (App.Callback) result -> {
+                        if (result.isSuccess()) {
+                            Log.v("TAG()", "zmieniono dane " + (Boolean) result.get());
+                            typ=(Boolean) result.get();
+                           Log.v("TAG()", "podano typp " + typ);
+                        } else {
+                            Log.v("TAG()", "niedodano" + result.getError());
+                            Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
+                        }
+                    });
             }
         });
+        ///////////////////////////////////////////////////////////////////////////////
+
+        //funkcja dodająca uzytkownika
         button2 = v.findViewById(R.id.imageButton);
         button2.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Functions functionsManager =MainActivity.myApp.getFunctions(user);
-                List<String> myList = Arrays.asList(editText.getText().toString());
-                functionsManager.callFunctionAsync("DodajOsobe", myList,Document.class, (App.Callback) result -> {
-                  if(result.isSuccess()){
-                        Log.v("TAG()", "dodano"+ (Document)result.get());
-                    }
-                    else{
-                        Log.v("TAG()", "niedodano"+ result.getError());
-                      Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
+                //funkcja sprawdza jakiego jakiego typu to konto
+                Functions functionsManager = MainActivity.myApp.getFunctions(user);
+                functionsManager.callFunctionAsync("getTyp", Collections.singletonList("aa"), Boolean.class, (App.Callback) result -> {
+                    if (result.isSuccess()) {
+                        Log.v("TAG()", "typ: " + (Boolean) result.get());
+                        typ=(Boolean) result.get();
+                    } else {
+                        Log.v("TAG()", "Błąd " + result.getError());
                     }
                 });
+
+
+
+                //sprawdza czy nie wprowadzono pustego stringa
+                if (editText.getText().toString().trim().length() > 0) {
+                   // Functions functionsManager = MainActivity.myApp.getFunctions(user);
+                    List<String> myList = Arrays.asList(editText.getText().toString());
+                    //jezeli uzytkownikiem wywolujacym funkcje jest podopieczny
+                    if (typ==true) {
+                        Log.v("TAG()", "dodaje kogos ");
+                        functionsManager.callFunctionAsync("addPerson", myList, Document.class, (App.Callback) result -> {
+                            if (result.isSuccess()) {
+                                Log.v("TAG()", "dodano kogos " + (Document) result.get());
+                                Toast.makeText(getContext(), "Dodano użytkownika", Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.v("TAG()", "niedodano kogos " + result.getError());
+                                Toast.makeText(getContext(), "Wystąpił błąd: " + result.getError(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    //jezeli uzytkownikiem wywolujacym funkcje jest opiekun
+                    else {
+                        Log.v("TAG()", "dodaje ciebie");
+                        functionsManager.callFunctionAsync("addYourself", myList, Document.class, (App.Callback) result -> {
+                            if (result.isSuccess()) {
+                                Log.v("TAG()", "dodano ciebie" + (Document) result.get());
+                                Toast.makeText(getContext(), "Dodano użytkownika", Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.v("TAG()", "niedodano ciebie" + result.getError());
+                                Toast.makeText(getContext(), "Wystąpił błąd: " + result.getError(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }else {
+                    Toast.makeText(getContext(), "Pole 'Numer telefonu' jest puste", Toast.LENGTH_LONG).show();
+                }
             }
         }));
         return v;

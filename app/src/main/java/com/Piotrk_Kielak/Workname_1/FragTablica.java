@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
+import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -18,15 +20,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.Piotrk_Kielak.Workname_1.Model.Opieka;
 import com.Piotrk_Kielak.Workname_1.Model.OpiekaAdapter;
 
+import org.bson.Document;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.mongodb.functions.Functions;
 import io.realm.mongodb.sync.SyncConfiguration;
 
 /**
@@ -36,10 +43,11 @@ import io.realm.mongodb.sync.SyncConfiguration;
  */
 public class FragTablica extends Fragment {
 
-    private User user;
+    private io.realm.mongodb.User user;
     private Realm userRealm=null;
     private RecyclerView recyclerView;
     private OpiekaAdapter adapter;
+    private Boolean typ;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -53,6 +61,18 @@ public class FragTablica extends Fragment {
         // Required empty public constructor
     }
 
+    public Boolean getType(){
+        Functions functionsManager = MainActivity.myApp.getFunctions(user);
+        functionsManager.callFunctionAsync("getTyp", Collections.singletonList(""), Boolean.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                Log.v("TAG()", "typ: " + (Boolean) result.get());
+                typ=(Boolean) result.get();
+            } else {
+                Log.v("TAG()", "Błąd " + result.getError());
+            }
+        });
+        return  typ;
+    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -83,8 +103,6 @@ public class FragTablica extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-
         View v = inflater.inflate(R.layout.fragment_frag_tablica,container,false);
         recyclerView= v.findViewById(R.id.button23);
         return v;
@@ -103,7 +121,12 @@ public class FragTablica extends Fragment {
             Log.e("pep", "blad 3");
             StringBuilder b= new StringBuilder().append("user=");
             //blad
+            Log.e("pep", String.valueOf(b.append(this.user.getId())));
         SyncConfiguration config = new SyncConfiguration.Builder(this.user, b.append(this.user.getId()).toString()).build();
+
+//            String realmName = "My Project";
+//            RealmConfiguration config = new RealmConfiguration.Builder().name(realmName).build();
+//            Realm backgroundThreadRealm = Realm.getInstance(config);
 
         Realm.getInstanceAsync(config, new Realm.Callback() {
             @Override

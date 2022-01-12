@@ -43,12 +43,42 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
 
     //zmienne wykrywania upadku
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometr;
-    private SensorEventListener sensorEventListner=new SensorEventListener(){
+    private SensorManager aSensorManager, gSensorManager;
+    private Sensor mAccelerometr, mGyroscope;
+
+    private double accelerationCurrentValue;
+    private double accelerationPreviousValue;
+
+    private double gyroCurrentValue;
+    private double gyroPreviousValue;
+    private SensorEventListener sensorAccEventListner=new SensorEventListener(){
         @Override
         public void onSensorChanged(SensorEvent sensorEvent){
+            float ax = sensorEvent.values[0];
+            float ay = sensorEvent.values[1];
+            float az = sensorEvent.values[2];
 
+            accelerationCurrentValue = Math.sqrt((ax*ax+ay*ay+az*az));
+
+            if(accelerationCurrentValue<4.6){
+                Log.v("tag", "peperoni gotowe");
+            }
+        }
+        @Override
+        public  void onAccuracyChanged(Sensor sensor, int i){
+
+        }
+    };
+    private SensorEventListener sensorGyroEventListner=new SensorEventListener(){
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent){
+            float gx = sensorEvent.values[0];
+            float gy = sensorEvent.values[1];
+            //float gz = sensorEvent.values[2];
+            gyroCurrentValue = Math.sqrt((gx*gx+gy*gy));
+            if(gyroCurrentValue>3.6){
+                Log.v("tag", "hawajska gotowa");
+            }
         }
         @Override
         public  void onAccuracyChanged(Sensor sensor, int i){
@@ -66,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
         //inicjalizacja realm app
         Realm.init(this);
         myApp = new App(new AppConfiguration.Builder(Appid).build());
-        String realmName = "My Project";
-        RealmConfiguration config = new RealmConfiguration.Builder().name(realmName).build();
-        Realm backgroundThreadRealm = Realm.getInstance(config);
+//        String realmName = "My Project";
+//        RealmConfiguration config = new RealmConfiguration.Builder().name(realmName).build();
+//        Realm backgroundThreadRealm = Realm.getInstance(config);
 
 
         //implementacja gornego paska
@@ -81,18 +111,22 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(bottomNav, navController);
 
         //inicjalizacja zmiennych
-        mSensorManager=(SensorManager)getSystemService(SENSOR_SERVICE);
-        mAccelerometr=mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        aSensorManager=(SensorManager)getSystemService(SENSOR_SERVICE);
+        gSensorManager=(SensorManager)getSystemService(SENSOR_SERVICE);
+        mAccelerometr=aSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mGyroscope=gSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
     }
 
     protected void onResume(){
         super.onResume();
-       // mSensorManager.registerListener(sensorEventListner,SensorManager.SENSOR_DELAY_NORMAL);
+        aSensorManager.registerListener(sensorAccEventListner,mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
+        gSensorManager.registerListener(sensorGyroEventListner,mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     protected void onPause(){
         super.onPause();
-        mSensorManager.unregisterListener(sensorEventListner);
+        aSensorManager.unregisterListener(sensorAccEventListner);
+        gSensorManager.unregisterListener(sensorGyroEventListner);
     }
 }

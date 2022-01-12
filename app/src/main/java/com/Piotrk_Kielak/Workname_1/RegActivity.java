@@ -144,7 +144,7 @@ public class RegActivity extends AppCompatActivity {
                     Log.i("Reg activity", "Zarejestrowano");
                     Intent intent = new Intent(getBaseContext(), LogActivity.class);
                     startActivity(intent);
-                    Toast.makeText(getBaseContext(),"Zarejestrowano",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(),"Zarejestrowano!",Toast.LENGTH_LONG).show();
                     Credentials creds = Credentials.emailPassword(num, has);
                     MainActivity.myApp.loginAsync(creds, new App.Callback<User>() {
                         @Override

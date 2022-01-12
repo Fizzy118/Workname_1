@@ -9,9 +9,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import java.util.Arrays;
+import java.util.List;
 
 import io.realm.Realm;
+import io.realm.mongodb.App;
 import io.realm.mongodb.User;
+import io.realm.mongodb.functions.Functions;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,7 +31,8 @@ public class FragProfil extends Fragment {
 
     private User user = null;
     private Realm userRealm;
-
+    private EditText numer, nick, haslo;
+    private ImageButton buttonNumer, buttonHaslo, buttonNick;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -66,9 +76,7 @@ public class FragProfil extends Fragment {
     @Override
     public void onStart(){
         super.onStart();
-
         this.user = MainActivity.myApp.currentUser();
-
         if (this.user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
@@ -81,7 +89,75 @@ public class FragProfil extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_frag_profil, container, false);
+        View v = inflater.inflate(R.layout.fragment_frag_profil,container,false);
+        //button= v.findViewById(R.id.button23);
+        numer=v.findViewById(R.id.textNumeredit);
+        nick=v.findViewById(R.id.textNickEdit);
+        haslo=v.findViewById(R.id.textHasloedit);
+        buttonNick=v.findViewById(R.id.updateNick);
+        buttonNumer=v.findViewById(R.id.updateNurmer);
+        buttonHaslo=v.findViewById(R.id.updateHaslo);
+        //Functions functionsManager =MainActivity.myApp.getFunctions(user);
+
+        //listner pola zmiany nazwy
+        buttonNick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (nick.getText().toString().trim().length() > 0) {
+                    List<String> myList = Arrays.asList(nick.getText().toString());
+                    Functions functionsManager =MainActivity.myApp.getFunctions(user);
+                    functionsManager.callFunctionAsync("changeNick", myList, String.class, (App.Callback) result -> {
+                        if (result.isSuccess()) {
+                            Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());
+                            Toast.makeText(getContext(), "Nazwa została zmieniona", Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.v("TAG()", "Nie udało się zminić nazwy" + result.getError());
+                            Toast.makeText(getContext(), "Wystąpił błąd ", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    Toast.makeText(getContext(), "Pole 'Pseudonim' jest puste", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        //listner pola zmiany hasla
+        buttonHaslo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (haslo.getText().toString().trim().length() > 0) {
+
+                    MainActivity.myApp.getEmailPassword().callResetPasswordFunction("21372137",haslo.getText().toString());
+                }
+                else {
+                    Toast.makeText(getContext(), "Pole 'hasło' jest puste", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        //Listner pola zmiany numeru telefonu
+        buttonNumer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (numer.getText().toString().trim().length() > 0){
+                    Functions functionsManager =MainActivity.myApp.getFunctions(user);
+                    List<String> myList = Arrays.asList(numer.getText().toString());
+                    functionsManager.callFunctionAsync("changeNumber", myList, String.class, (App.Callback) result -> {
+                        if (result.isSuccess()) {
+                            Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());
+                            Toast.makeText(getContext(), "Nazwa została zmieniona", Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.v("TAG()", "Nie udało się zminić nazwy" + result.getError());
+                            Toast.makeText(getContext(), "Wystąpił błąd ", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    Toast.makeText(getContext(), "Pole 'numer telefonu' jest puste", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        return v;
     }
 }
