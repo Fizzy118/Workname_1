@@ -1,5 +1,10 @@
 package com.Piotrk_Kielak.Workname_1;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +12,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -15,6 +22,7 @@ import android.view.ViewGroup;
  */
 public class FragInfo extends Fragment {
 
+    private Button button;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -54,12 +62,25 @@ public class FragInfo extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_frag_info, container, false);
+        //funkcja po nacisnieciu przyciusku kopiuje adres email autora do schowka
+        View v = inflater.inflate(R.layout.fragment_frag_info, container, false);
+        button = v.findViewById(R.id.button2);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboard =(ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("skopiowano", "piotr.kielak2.stud@pw.edu.pl");
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(getContext(), "Skopiowano Email do schowka.",Toast.LENGTH_SHORT).show();
+            }
+        });
+        return v;
     }
 }
+

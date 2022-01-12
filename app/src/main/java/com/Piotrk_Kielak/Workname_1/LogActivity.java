@@ -60,7 +60,7 @@ public class LogActivity extends AppCompatActivity{
         // successful login ends this activity, bringing the user back to the project activity
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(getBaseContext(), FragDodaj.class); //zmienic na frag_tablice
+        Intent intent = new Intent(getBaseContext(), MainActivity.class); //zmienic na frag_tablice
         startActivity(intent);
     }
 

@@ -104,12 +104,14 @@ public class FragTablica extends Fragment {
             StringBuilder b= new StringBuilder().append("user=");
             //blad
         SyncConfiguration config = new SyncConfiguration.Builder(this.user, b.append(this.user.getId()).toString()).build();
-            Log.e("pep", "blad 4");
+
         Realm.getInstanceAsync(config, new Realm.Callback() {
             @Override
             public void onSuccess(Realm realm) {
                 FragTablica.this.userRealm = realm;
+                Log.e("pep", "blad 4");
                 FragTablica.this.setUpRecyclerView(FragTablica.this.getOpieka(realm));
+                Log.e("pep", "blad 5");
             }
         });
         }
@@ -135,10 +137,15 @@ public class FragTablica extends Fragment {
     private RealmList getOpieka(Realm realm){
         RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
         com.Piotrk_Kielak.Workname_1.Model.User syncedUser = (com.Piotrk_Kielak.Workname_1.Model.User) syncedUsers.get(0);
-        Log.e("pep", "blad 2");
-        return syncedUser.getPolaczenie();
-
+        if(syncedUser!=null) {
+            return syncedUser.getPolaczenie();
+        }
+        else{
+            Log.e("pep", "blad 5");
+            return syncedUser.getPolaczenie();
+        }
     }
+
     private void setUpRecyclerView(RealmList opiekaList){
 
     this.adapter=new OpiekaAdapter(opiekaList,this.adapter.getUser());

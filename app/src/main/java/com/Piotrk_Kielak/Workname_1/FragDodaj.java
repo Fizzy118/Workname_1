@@ -139,8 +139,19 @@ public class FragDodaj extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), Zaproszenia.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getContext(), Zaproszenia.class);
+//                startActivity(intent);
+                Functions functionsManager =MainActivity.myApp.getFunctions(user);
+                List<String> myList = Arrays.asList("tomek","21372137");
+                functionsManager.callFunctionAsync("getTyp", myList,Boolean.class, (App.Callback) result -> {
+                    if(result.isSuccess()){
+                        Log.v("TAG()", "zmieniono dane "+ (Boolean)result.get());
+                    }
+                    else{
+                        Log.v("TAG()", "niedodano"+ result.getError());
+                        Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
+                    }
+                });
 
             }
         });
@@ -157,7 +168,7 @@ public class FragDodaj extends Fragment {
                     }
                     else{
                         Log.v("TAG()", "niedodano"+ result.getError());
-                      Toast.makeText(getContext(), "Zły numer", Toast.LENGTH_LONG).show();
+                      Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
                     }
                 });
             }

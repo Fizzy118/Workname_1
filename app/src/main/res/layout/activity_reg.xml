@@ -27,18 +27,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include2" />
 
-    <ImageButton
-        android:id="@+id/imagereg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textreg1"
-        tools:ignore="SpeakableTextPresentCheck"
-        tools:src="@tools:sample/avatars" />
-
     <Button
         android:id="@+id/buttonreg1"
         android:layout_width="wrap_content"
@@ -92,16 +80,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:hint="Pseudonim"
-        app:counterEnabled="true"
 
+        app:counterEnabled="true"
         app:counterMaxLength="9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imagereg"
+        app:layout_constraintTop_toBottomOf="@+id/textreg1"
         app:startIconDrawable="@drawable/ic_baseline_person_24">
 
         <com.google.android.material.textfield.TextInputEditText

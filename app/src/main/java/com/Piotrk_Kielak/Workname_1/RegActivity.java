@@ -80,7 +80,7 @@ public class RegActivity extends AppCompatActivity {
         RegActivity.this.addDocument();
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(getBaseContext(), FragDodaj.class); //zmienic na frag_tablice
+        Intent intent = new Intent(getBaseContext(), MainActivity.class); //zmienic na frag_tablice
         startActivity(intent);
     }
 
@@ -90,11 +90,22 @@ public class RegActivity extends AppCompatActivity {
     }
 
     private void addDocument(){
+        user = MainActivity.myApp.currentUser();
+        Functions functionsManager =MainActivity.myApp.getFunctions(user);
+        List<String> myList = Arrays.asList(textpseudonimreg.getText().toString());
         if(radio2.isChecked()){
-            user = MainActivity.myApp.currentUser();
-            Functions functionsManager =MainActivity.myApp.getFunctions(user);
-            List<String> myList = Arrays.asList(textpseudonimreg.getText().toString());
             functionsManager.callFunctionAsync("NowyDokument", myList,Document.class, (App.Callback) result -> {
+                if(result.isSuccess()){
+                    Log.v("TAG()", "utworzono"+ (Document)result.get());
+
+                }
+                else{
+                    Log.v("TAG()", "nie utworzono"+ result.getError());
+                }
+            });
+        }
+        else {
+            functionsManager.callFunctionAsync("NowyDokument2", myList,Document.class, (App.Callback) result -> {
                 if(result.isSuccess()){
                     Log.v("TAG()", "utworzono"+ (Document)result.get());
 
