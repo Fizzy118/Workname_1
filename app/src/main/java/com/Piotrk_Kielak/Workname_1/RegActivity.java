@@ -11,17 +11,17 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-import android.os.Handler;
 import org.bson.Document;
-
 import java.util.Arrays;
 import java.util.List;
-
 import io.realm.mongodb.App;
 import io.realm.mongodb.Credentials;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
 
+/**
+ * Widok umożliwiający rejestracje nowego konta.
+ */
 public class RegActivity extends AppCompatActivity {
      RadioGroup radioGroup;
     RadioButton radio1, radio2;
@@ -41,6 +41,8 @@ public class RegActivity extends AppCompatActivity {
         hasłoreg=findViewById(R.id.hasloReg);
         logowanie=findViewById(R.id.buttonreg2);
         zarejestruj=findViewById(R.id.buttonreg1);
+
+        // przejście do widoku logowania.
         logowanie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,6 +51,7 @@ public class RegActivity extends AppCompatActivity {
             }
         });
 
+        // Rejestracja.
         zarejestruj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,7 +60,7 @@ public class RegActivity extends AppCompatActivity {
         });
     }
     public void onBackPressed(){
-        // Disable going back to the MainActivity
+        // wyłączenie możliwości powrotu.
         this.moveTaskToBack(true);
     }
     private final void onRegFailed(String errormsg) {
@@ -76,19 +79,20 @@ public class RegActivity extends AppCompatActivity {
         }
     }
     private final void onLoginSuccess(){
-        // successful login ends this activity, bringing the user back to the project activity
+        // po udanym zarejestrowaniu przenosi uzytkownika do fragmentu tablica.
         RegActivity.this.addDocument();
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(getBaseContext(), MainActivity.class); //zmienic na frag_tablice
+        // TODO: zmienic na frag_tablice
+        Intent intent = new Intent(getBaseContext(), MainActivity.class);
         startActivity(intent);
     }
 
     private final void onLoginFailed(String errormsg) {
-        // Log.e(TAG(), errormsg);
         Toast.makeText(this.getBaseContext(), errormsg, Toast.LENGTH_LONG).show();
     }
 
+    // Funcja umożliwiająca przypisanie kontu dodatkowych wartości w postaci pseudonimu oraz typu.
     private void addDocument(){
         user = MainActivity.myApp.currentUser();
         Functions functionsManager =MainActivity.myApp.getFunctions(user);
@@ -120,8 +124,8 @@ public class RegActivity extends AppCompatActivity {
     //funkcja rejestrujaca uzytkownika
     private void reg(){
 
+        // sprawdza czy wprowadzony tekst jest poprawny.
         if(editTextPhonereg.getText().toString().isEmpty() || hasłoreg.getText().toString().isEmpty() || textpseudonimreg.getText().toString().isEmpty() || checked(radio1, radio2)){
-
             onRegFailed("Zły numer lub hasło");
             return;
         }
@@ -131,6 +135,7 @@ public class RegActivity extends AppCompatActivity {
         String has=this.hasłoreg.getText().toString();
         String num=this.editTextPhonereg.getText().toString();
 
+        //rejestracja.
         MainActivity.myApp.getEmailPassword().registerUserAsync(num, has, new App.Callback<Void>() {
             @Override
             public void onResult(App.Result<Void> result) {
@@ -145,6 +150,8 @@ public class RegActivity extends AppCompatActivity {
                     Intent intent = new Intent(getBaseContext(), LogActivity.class);
                     startActivity(intent);
                     Toast.makeText(getBaseContext(),"Zarejestrowano!",Toast.LENGTH_LONG).show();
+
+                    // logowanie po zarejestrowaniu.
                     Credentials creds = Credentials.emailPassword(num, has);
                     MainActivity.myApp.loginAsync(creds, new App.Callback<User>() {
                         @Override

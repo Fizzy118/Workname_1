@@ -1,66 +1,44 @@
 package com.Piotrk_Kielak.Workname_1;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import io.realm.OrderedCollectionChangeSet;
-import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.mongodb.App;
-import io.realm.mongodb.User;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import com.Piotrk_Kielak.Workname_1.Model.Opieka;
 import com.Piotrk_Kielak.Workname_1.Model.OpiekaAdapter;
-
-import org.bson.Document;
-
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-
 import io.realm.Realm;
 import io.realm.mongodb.functions.Functions;
 import io.realm.mongodb.sync.SyncConfiguration;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragTablica#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment layoutu odpowiadający za wyświetlanie najważniejszych informacji. W zależności od typu użytkownika
+ * fragment wyświetla podopiecznych w formie listy lub zadania które podopieczny ma do zrobienia.
+ * Po kliknięciu na podopiecznego wyświetli się lista zadań oraz możliwość dodania kolejnego zadania. Po kliknięciu na
+ * przycisk mapy wyświetli się fragment mapy z podaną lokalizacją podopiecznego.
  */
+// TODO: funkcja wyświetlająca dane z bazy w formie listy wymaga dokończenia. Dla działającej zostaje zintegrowanie tasków oraz mapy.
 public class FragTablica extends Fragment {
-
     private io.realm.mongodb.User user;
     private Realm userRealm=null;
     private RecyclerView recyclerView;
     private OpiekaAdapter adapter;
     private Boolean typ;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public FragTablica() {
         // Required empty public constructor
     }
 
+    // Funkcja zwracająca typ użytkownika
     public Boolean getType(){
         Functions functionsManager = MainActivity.myApp.getFunctions(user);
         functionsManager.callFunctionAsync("getTyp", Collections.singletonList(""), Boolean.class, (App.Callback) result -> {
@@ -73,45 +51,32 @@ public class FragTablica extends Fragment {
         });
         return  typ;
     }
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragTablica.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragTablica newInstance(String param1, String param2) {
-        FragTablica fragment = new FragTablica();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
+    // TODO: wybór wyświetlonego layoutu
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_frag_tablica,container,false);
-        recyclerView= v.findViewById(R.id.button23);
+        View v;
+        typ=false;
+        if(typ==false) {
+             v = inflater.inflate(R.layout.fragment_frag_tablica, container, false);
+        }else{
+             v = inflater.inflate(R.layout.fragment_frag_tablica_podopiecznego, container, false);
+        }
+        recyclerView= v.findViewById(R.id.project_list);
         return v;
     }
 
+    // TODO: do poprawy
     @Override
     public void onStart(){
         super.onStart();
         this.user = MainActivity.myApp.currentUser();
+        typ=getType();
         //jesli nikt nie jest zalogowany, zacznij od logowania
         if (this.user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
@@ -120,21 +85,18 @@ public class FragTablica extends Fragment {
         else{
             Log.e("pep", "blad 3");
             StringBuilder b= new StringBuilder().append("user=");
-            //blad
-            Log.e("pep", String.valueOf(b.append(this.user.getId())));
-        SyncConfiguration config = new SyncConfiguration.Builder(this.user, b.append(this.user.getId()).toString()).build();
+        SyncConfiguration config = new SyncConfiguration.Builder(user, String.valueOf(b)).build();
 
 //            String realmName = "My Project";
 //            RealmConfiguration config = new RealmConfiguration.Builder().name(realmName).build();
 //            Realm backgroundThreadRealm = Realm.getInstance(config);
-
-        Realm.getInstanceAsync(config, new Realm.Callback() {
+//
+        // blad
+        Realm.getInstanceAsync((RealmConfiguration) config, new Realm.Callback() {
             @Override
             public void onSuccess(Realm realm) {
                 FragTablica.this.userRealm = realm;
-                Log.e("pep", "blad 4");
-                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpieka(realm));
-                Log.e("pep", "blad 5");
+                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpieka(realm));//????
             }
         });
         }
@@ -160,6 +122,7 @@ public class FragTablica extends Fragment {
     private RealmList getOpieka(Realm realm){
         RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
         com.Piotrk_Kielak.Workname_1.Model.User syncedUser = (com.Piotrk_Kielak.Workname_1.Model.User) syncedUsers.get(0);
+
         if(syncedUser!=null) {
             return syncedUser.getPolaczenie();
         }
@@ -170,7 +133,6 @@ public class FragTablica extends Fragment {
     }
 
     private void setUpRecyclerView(RealmList opiekaList){
-
     this.adapter=new OpiekaAdapter(opiekaList,this.adapter.getUser());
     this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     this.recyclerView.setAdapter(this.adapter);

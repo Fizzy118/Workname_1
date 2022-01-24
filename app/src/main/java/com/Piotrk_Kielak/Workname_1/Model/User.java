@@ -9,18 +9,18 @@ import io.realm.annotations.RealmField;
 public class User extends RealmObject {
     @PrimaryKey @RealmField("_id")
     private String id;
-    private RealmList<Opieka> polaczenie;
+    private RealmList<Opieka> memberOf;
     private String nick;
-    private String numer;
+    private String name;
     private String _partition;
-    private Boolean typ;
+    private Boolean type;
 
     public RealmList<Opieka> getPolaczenie() {
-        return polaczenie;
+        return memberOf;
     }
 
     public void setPolaczenie(RealmList<Opieka> polaczenie) {
-        this.polaczenie = polaczenie;
+        this.memberOf = polaczenie;
     }
     public final String getId(){return this.id;}
     public final void setId(String id){
@@ -37,16 +37,24 @@ public class User extends RealmObject {
         this.nick=nc;
     }
 
-    public final boolean getTyp(){return this.typ;}
-    public final void setTyp(Boolean t){
-        this.typ=t;
+    public final boolean getType(){return this.type;}
+    public final void setType(Boolean t){
+        this.type=t;
     }
 
-    public final String getNumer(){return this.numer;}
+    public final String getNumer(){return this.name;}
     public final void setNumer(String nr){
-        this.numer=nr;
+        this.name=nr;
     }
 
-
+//    public User(String id, String _partition,  RealmList memberOf,  String name, String nick, Boolean type) {
+//        super();
+//        this.id = id;
+//        this._partition = _partition;
+//        this.memberOf = memberOf;
+//        this.numer = name;
+//        this.nick = nick;
+//        this.type = type;
+//    }
 
 }

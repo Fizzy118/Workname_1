@@ -13,6 +13,10 @@ import io.realm.RealmRecyclerViewAdapter;
 import com.Piotrk_Kielak.Workname_1.R;
 import com.Piotrk_Kielak.Workname_1.ZadActivity;
 
+/**
+ * Adapter do wyświetlania podopiecznych w formie listy.
+ */
+// TODO: poprawić.
 public class OpiekaAdapter extends RealmRecyclerViewAdapter<Opieka, OpiekaAdapter.OpiekaViewHolder> {
     public ViewGroup parent;
     private User user;
@@ -53,15 +57,15 @@ public class OpiekaAdapter extends RealmRecyclerViewAdapter<Opieka, OpiekaAdapte
     holder.setData(obj);
     holder.getName().setText((CharSequence)(obj != null ? obj.getImie() : null));
 
-    holder.itemView.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(OpiekaAdapter.this.getParent().getContext(), ZadActivity.class);
-            intent.putExtra("Partycja", obj.getPartycja());
-            intent.putExtra("Imie", obj.getPartycja());
-            OpiekaAdapter.this.getParent().getContext().startActivity(intent);
-        }
-    });
+//    holder.itemView.setOnClickListener(new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            Intent intent = new Intent(OpiekaAdapter.this.getParent().getContext(), ZadActivity.class);
+//            intent.putExtra("Partytion", obj.getPartycja());
+//            intent.putExtra("Name", obj.getPartycja());
+//            OpiekaAdapter.this.getParent().getContext().startActivity(intent);
+//        }
+//    });
     }
 
 

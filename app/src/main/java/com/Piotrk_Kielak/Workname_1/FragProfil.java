@@ -2,30 +2,24 @@ package com.Piotrk_Kielak.Workname_1;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import java.util.Arrays;
 import java.util.List;
-
 import io.realm.Realm;
 import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragProfil#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment layoutu umożliwiający edytowanie swoich danych osobowych przypisanych do konta.
+ * Zawiera pola tekstowe dla pseudonimu, hasła i numeru telefonu, oraz odpowiadające im przyciski.
  */
 public class FragProfil extends Fragment {
 
@@ -33,56 +27,27 @@ public class FragProfil extends Fragment {
     private Realm userRealm;
     private EditText numer, nick, haslo;
     private ImageButton buttonNumer, buttonHaslo, buttonNick;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public FragProfil() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragProfil.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragProfil newInstance(String param1, String param2) {
-        FragProfil fragment = new FragProfil();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public void onStart(){
         super.onStart();
+        // sprawdza czy uzytkownik jest zalogowany, jeżeli nie to przekierowuje go do ekranu logowania.
         this.user = MainActivity.myApp.currentUser();
         if (this.user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
         }
         else{
-        //Log.e("Tag",user.get);
         }
     }
 
@@ -99,13 +64,16 @@ public class FragProfil extends Fragment {
         buttonHaslo=v.findViewById(R.id.updateHaslo);
         //Functions functionsManager =MainActivity.myApp.getFunctions(user);
 
-        //listner pola zmiany nazwy
+        // Funkcja odpowiadajaca za zmiane pseudonium uzytkownika
         buttonNick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // sprawdzenie czy pole tekstowe nie jest puste.
                 if (nick.getText().toString().trim().length() > 0) {
                     List<String> myList = Arrays.asList(nick.getText().toString());
                     Functions functionsManager =MainActivity.myApp.getFunctions(user);
+
                     functionsManager.callFunctionAsync("changeNick", myList, String.class, (App.Callback) result -> {
                         if (result.isSuccess()) {
                             Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());
@@ -122,12 +90,13 @@ public class FragProfil extends Fragment {
             }
         });
 
-        //listner pola zmiany hasla
+        //Funkcja odpowiadajaca za zmiane hasła uzytkownika.
+        // TODO: utworzyć widok umożliwiający wprowadzenie adresu email na który zostanie wysłane resetowanie hasła.
         buttonHaslo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // sprawdzenie czy pole tekstowe nie jest puste.
                 if (haslo.getText().toString().trim().length() > 0) {
-
                     MainActivity.myApp.getEmailPassword().callResetPasswordFunction("21372137",haslo.getText().toString());
                 }
                 else {
@@ -136,13 +105,16 @@ public class FragProfil extends Fragment {
             }
         });
 
-        //Listner pola zmiany numeru telefonu
+        //Funkcja odpowiadajaca za zmiane numeru telefonu uzytkownika.
         buttonNumer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // sprawdzenie czy pole tekstowe nie jest puste.
                 if (numer.getText().toString().trim().length() > 0){
                     Functions functionsManager =MainActivity.myApp.getFunctions(user);
                     List<String> myList = Arrays.asList(numer.getText().toString());
+
                     functionsManager.callFunctionAsync("changeNumber", myList, String.class, (App.Callback) result -> {
                         if (result.isSuccess()) {
                             Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());

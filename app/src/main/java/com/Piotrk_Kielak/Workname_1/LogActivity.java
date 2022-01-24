@@ -1,25 +1,19 @@
 package com.Piotrk_Kielak.Workname_1;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.util.Log;
 import android.widget.Toast;
-
-import com.google.android.material.textfield.TextInputEditText;
-
 import io.realm.mongodb.App;
 import io.realm.mongodb.Credentials;
-import io.realm.mongodb.App.Callback;
-import io.realm.mongodb.App.Result;
 import io.realm.mongodb.User;
 
-
+/**
+ * Widok logowania umożliwiający zalogowanie się do istniejącego konta lub przejscie do widoku rejestracji.
+ */
 public class LogActivity extends AppCompatActivity{
     private EditText haslo,numer;
     private Button zaloguj, zarejestruj;
@@ -30,10 +24,10 @@ public class LogActivity extends AppCompatActivity{
 
         zaloguj=findViewById(R.id.buttonlog1);
         zarejestruj=findViewById(R.id.buttonlog2);
-
         haslo=findViewById(R.id.hasloll);
         numer=findViewById(R.id.phonelog);
 
+        // Funkcja logowania.
         zaloguj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -41,6 +35,7 @@ public class LogActivity extends AppCompatActivity{
             }
         });
 
+        // Przejście do widoku rejestracji.
         zarejestruj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,17 +45,17 @@ public class LogActivity extends AppCompatActivity{
         });
     }
 
-    //@Override
     public void onBackPressed(){
-        // Disable going back to the MainActivity
+        // Zablokowanie możliwości przejścia wstecz.
         this.moveTaskToBack(true);
     }
 
     private final void onLoginSuccess(){
-        // successful login ends this activity, bringing the user back to the project activity
+        // po udanym zalogowaniu przejść do fragmentu tablica
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano!", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(getBaseContext(), MainActivity.class); //zmienic na frag_tablice
+        // TODO: zmienic na frag_tablica
+        Intent intent = new Intent(getBaseContext(), MainActivity.class);
         startActivity(intent);
     }
 
@@ -70,7 +65,7 @@ public class LogActivity extends AppCompatActivity{
     }
 
 
-
+    // Funkcja umożliwiająca logowanie
     private void login(){
         if(numer.getText().toString().isEmpty() || haslo.getText().toString().isEmpty()){
             onLoginFailed("Zły numer lub hasło");
