@@ -55,7 +55,7 @@ public class OpiekaAdapter extends RealmRecyclerViewAdapter<Opieka, OpiekaAdapte
     public void onBindViewHolder(@NonNull OpiekaViewHolder holder, int position) {
     Opieka obj = this.getItem(position);
     holder.setData(obj);
-    holder.getName().setText((CharSequence)(obj != null ? obj.getImie() : null));
+    //holder.getName().setText((CharSequence)(obj != null ? obj.getImie() : null));
 
 //    holder.itemView.setOnClickListener(new View.OnClickListener() {
 //        @Override

@@ -1,29 +1,15 @@
 package com.Piotrk_Kielak.Workname_1.Model;
 
 import io.realm.RealmObject;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmField;
 
 public class Opieka extends RealmObject {
-    private String name;
-    private String partition;
-
-
-    public String getImie() {
-        return name;
+    @SuppressWarnings("unused")
+    private RealmList<User> userList;
+    public RealmList<User> getUserList(){
+        return userList;
     }
-
-    public void setImie(String name) {
-        this.name = name;
-    }
-
-
-
-    public String getPartycja() {
-        return partition;
-    }
-
-    public void setPartycja(String partycja) {
-        this.partition = partycja;
-    }
-
-
 }

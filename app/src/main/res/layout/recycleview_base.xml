@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/parent_layout"
+    android:padding="15dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/person_name"
+        android:layout_centerVertical="true"
+        android:textSize="17sp"
+        />
+
+    <ImageButton
+        android:id="@+id/map_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:layout_toStartOf="@+id/delete_button"
+        android:background="@drawable/ic_map" />
+
+    <ImageButton
+        android:id="@+id/task_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:layout_toStartOf="@+id/map_button"
+        android:background="@drawable/ic_baseline_comment_24" />
+
+    <ImageButton
+        android:id="@+id/delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/ic_baseline_delete_24" />
+</RelativeLayout>

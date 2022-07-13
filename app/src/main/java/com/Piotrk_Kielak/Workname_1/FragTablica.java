@@ -8,17 +8,41 @@ import io.realm.RealmResults;
 import io.realm.mongodb.App;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.Piotrk_Kielak.Workname_1.Model.Opieka;
 import com.Piotrk_Kielak.Workname_1.Model.OpiekaAdapter;
+import com.Piotrk_Kielak.Workname_1.Model.RecyclerViewAdapter;
+import com.Piotrk_Kielak.Workname_1.Model.Rodzina;
+import com.Piotrk_Kielak.Workname_1.Model.UserAdapter;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+
 import io.realm.Realm;
+import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
 import io.realm.mongodb.sync.SyncConfiguration;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import org.bson.Document;
+
+import io.realm.Realm;
 
 /**
  * Fragment layoutu odpowiadający za wyświetlanie najważniejszych informacji. W zależności od typu użytkownika
@@ -28,11 +52,13 @@ import io.realm.mongodb.sync.SyncConfiguration;
  */
 // TODO: funkcja wyświetlająca dane z bazy w formie listy wymaga dokończenia. Dla działającej zostaje zintegrowanie tasków oraz mapy.
 public class FragTablica extends Fragment {
-    private io.realm.mongodb.User user;
-    private Realm userRealm=null;
+    private User user=null;
+    private Realm userRealm=Realm.getDefaultInstance();
     private RecyclerView recyclerView;
-    private OpiekaAdapter adapter;
+    private UserAdapter adapter;
     private Boolean typ;
+    private  ArrayList<Document> user_list;
+
 
     public FragTablica() {
         // Required empty public constructor
@@ -52,9 +78,13 @@ public class FragTablica extends Fragment {
         return  typ;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Realm.deleteRealm(Realm.getDefaultConfiguration());
+
+        setUpRecyclerView();
     }
     // TODO: wybór wyświetlonego layoutu
     @Override
@@ -77,28 +107,25 @@ public class FragTablica extends Fragment {
         super.onStart();
         this.user = MainActivity.myApp.currentUser();
         typ=getType();
+
         //jesli nikt nie jest zalogowany, zacznij od logowania
         if (this.user == null){
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
         }
         else{
-            Log.e("pep", "blad 3");
-            StringBuilder b= new StringBuilder().append("user=");
-        SyncConfiguration config = new SyncConfiguration.Builder(user, String.valueOf(b)).build();
-
-//            String realmName = "My Project";
-//            RealmConfiguration config = new RealmConfiguration.Builder().name(realmName).build();
-//            Realm backgroundThreadRealm = Realm.getInstance(config);
-//
-        // blad
-        Realm.getInstanceAsync((RealmConfiguration) config, new Realm.Callback() {
-            @Override
-            public void onSuccess(Realm realm) {
-                FragTablica.this.userRealm = realm;
-                FragTablica.this.setUpRecyclerView(FragTablica.this.getOpieka(realm));//????
-            }
-        });
+            //funkcja sprawdza jakiego jakiego typu to konto
+            Functions functionsManager = MainActivity.myApp.getFunctions(user);
+            Log.v("fragtab", "user blad");
+            List<String> myList = null;
+//            functionsManager.callFunctionAsync("getTyp", myList, Boolean.class, (App.Callback) result -> {
+//                if (result.isSuccess()) {
+//                    Log.v("fragtab", "typ: " + (Boolean) result.get());
+//                    typ=(Boolean) result.get();
+//                } else {
+//                    Log.v("fragtab", "Błąd " + result.getError());
+//                }
+//            });
         }
     }
 
@@ -116,27 +143,37 @@ public class FragTablica extends Fragment {
         if(this.userRealm != null){
             userRealm.close();
         }
-        this.recyclerView.setAdapter((RecyclerView.Adapter) null);
+        recyclerView.setAdapter(null);
     }
 
-    private RealmList getOpieka(Realm realm){
-        RealmResults syncedUsers = realm.where(com.Piotrk_Kielak.Workname_1.Model.User.class).sort("id").findAll();
-        com.Piotrk_Kielak.Workname_1.Model.User syncedUser = (com.Piotrk_Kielak.Workname_1.Model.User) syncedUsers.get(0);
 
-        if(syncedUser!=null) {
-            return syncedUser.getPolaczenie();
-        }
-        else{
-            Log.e("pep", "blad 5");
-            return syncedUser.getPolaczenie();
-        }
-    }
+    private void setUpRecyclerView(){
+        Log.v("recview", "start ");
+        user = MainActivity.myApp.currentUser();
+        Functions functionsManager = MainActivity.myApp.getFunctions(user);
+        List<com.Piotrk_Kielak.Workname_1.Model.User> myList = new ArrayList<>();
+        functionsManager.callFunctionAsync("getList", myList, ArrayList.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                Log.v("setUpRecyclerView", "pobrano liste: " + (ArrayList<com.Piotrk_Kielak.Workname_1.Model.User>) result.get());
+                user_list = (ArrayList<Document>) result.get();
+            } else {
+                Log.v("setUpRecyclerView", "błąd: " + result.get());
+            }
 
-    private void setUpRecyclerView(RealmList opiekaList){
-    this.adapter=new OpiekaAdapter(opiekaList,this.adapter.getUser());
-    this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-    this.recyclerView.setAdapter(this.adapter);
-    this.recyclerView.setHasFixedSize(true);
-    this.recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),1));
+            if(user_list==null) {
+                Toast.makeText(getContext(), "Nikogo nie dodano.", Toast.LENGTH_LONG).show();
+            }
+            else{
+                    recyclerView.setLayoutManager(
+                            new LinearLayoutManager(getActivity().getApplicationContext()));
+//        recyclerView.setHasFixedSize(true);
+//        recyclerView.addItemDecoration(new DividerItemDecoration(
+//                getActivity().getApplicationContext(),
+//                DividerItemDecoration.VERTICAL));
+                    RecyclerViewAdapter adapter = new RecyclerViewAdapter(getActivity(), user_list);
+                    recyclerView.setAdapter(adapter);
+                };
+            }
+    );
     }
 }

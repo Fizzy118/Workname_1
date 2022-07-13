@@ -12,9 +12,17 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import org.bson.Document;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
+import io.realm.Sort;
 import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
@@ -32,7 +40,8 @@ public class FragDodaj extends Fragment {
     private EditText editText;
     private Boolean typ;
     ArrayList arrayList;
-
+    private ArrayList<com.Piotrk_Kielak.Workname_1.Model.User> pep;
+    private Realm realm;
 
     public FragDodaj() {
         // Required empty public constructor
@@ -58,10 +67,10 @@ public class FragDodaj extends Fragment {
             List<String> myList = Arrays.asList(editText.getText().toString());
             functionsManager.callFunctionAsync("getTyp", myList, Boolean.class, (App.Callback) result -> {
                 if (result.isSuccess()) {
-                    Log.v("TAG()", "typ: " + (Boolean) result.get());
+                    Log.v("TAG(funkcja getTyp)", "typ: " + (Boolean) result.get());
                     typ=(Boolean) result.get();
                 } else {
-                    Log.v("TAG()", "Błąd " + result.getError());
+                    Log.v("TAG(funkcja getTyp)", "Błąd " + result.getError());
                 }
             });
         }
@@ -78,23 +87,21 @@ public class FragDodaj extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(getContext(), Zaproszenia.class);
-//                startActivity(intent);
 
-                    Functions functionsManager = MainActivity.myApp.getFunctions(user);
-                    List<String> myListt = Arrays.asList("tomek", "21372137");
-                    functionsManager.callFunctionAsync("getNumberOpiekuna", myListt, ArrayList.class, (App.Callback) result -> {
-                        if (result.isSuccess()) {
-                            Log.v("TAG()", "zmieniono dane " + (ArrayList) result.get());
-                           arrayList=(ArrayList) result.get();
-                            Log.v("TAG()", "jedyneczka " +arrayList.get(0));
 
-                         //  Log.v("TAG()", "podano typp " + typ);
-                        } else {
-                            Log.v("TAG()", "niedodano" + result.getError());
-                            Toast.makeText(getContext(), "Wystąpił błąd", Toast.LENGTH_LONG).show();
-                        }
-                    });
+
+                Functions functionsManager = MainActivity.myApp.getFunctions(user);
+                List<String> myList = Arrays.asList("000111");
+               functionsManager.callFunctionAsync("getLatitude", myList, Double.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                Log.v("TAG()", "dodano kogos " + (Double) result.get());
+                Toast.makeText(getContext(), "Dodano użytkownika", Toast.LENGTH_LONG).show();
+            } else {
+                Log.v("TAG(1)", "niedodano kogos " + result.get());
+                Toast.makeText(getContext(), "Wystąpił błąd: " + result.getError(), Toast.LENGTH_LONG).show();
+            }
+
+        });
             }
         });
         ///////////////////////////////////////////////////////////////////////////////
@@ -106,12 +113,10 @@ public class FragDodaj extends Fragment {
             public void onClick(View v) {
                 Functions functionsManager = MainActivity.myApp.getFunctions(user);
                 List<String> myList = Arrays.asList(editText.getText().toString());
-
-
                 //sprawdza czy nie wprowadzono pustego stringa
                 if (editText.getText().toString().trim().length() > 0) {
                     //jezeli uzytkownikiem wywolujacym funkcje jest podopieczny
-                    if (typ==true) {
+                    if (!typ) {
                         Log.v("TAG()", "dodaje kogos ");
                         functionsManager.callFunctionAsync("addPerson", myList, Document.class, (App.Callback) result -> {
                             if (result.isSuccess()) {

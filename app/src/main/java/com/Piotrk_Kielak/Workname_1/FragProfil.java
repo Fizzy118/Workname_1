@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import org.bson.Document;
+
 import java.util.Arrays;
 import java.util.List;
 import io.realm.Realm;
@@ -74,9 +77,9 @@ public class FragProfil extends Fragment {
                     List<String> myList = Arrays.asList(nick.getText().toString());
                     Functions functionsManager =MainActivity.myApp.getFunctions(user);
 
-                    functionsManager.callFunctionAsync("changeNick", myList, String.class, (App.Callback) result -> {
+                    functionsManager.callFunctionAsync("changeNick", myList, Document.class, (App.Callback) result -> {
                         if (result.isSuccess()) {
-                            Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());
+                            Log.v("TAG()", "Nazwa została zmieniona" + (Document) result.get());
                             Toast.makeText(getContext(), "Nazwa została zmieniona", Toast.LENGTH_LONG).show();
                         } else {
                             Log.v("TAG()", "Nie udało się zminić nazwy" + result.getError());
@@ -115,9 +118,9 @@ public class FragProfil extends Fragment {
                     Functions functionsManager =MainActivity.myApp.getFunctions(user);
                     List<String> myList = Arrays.asList(numer.getText().toString());
 
-                    functionsManager.callFunctionAsync("changeNumber", myList, String.class, (App.Callback) result -> {
+                    functionsManager.callFunctionAsync("changeNumber", myList, Document.class, (App.Callback) result -> {
                         if (result.isSuccess()) {
-                            Log.v("TAG()", "Nazwa została zmieniona" + (String) result.get());
+                            Log.v("TAG()", "Nazwa została zmieniona" + (Document) result.get());
                             Toast.makeText(getContext(), "Nazwa została zmieniona", Toast.LENGTH_LONG).show();
                         } else {
                             Log.v("TAG()", "Nie udało się zminić nazwy" + result.getError());

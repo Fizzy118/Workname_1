@@ -14,6 +14,8 @@ import android.widget.Toast;
 import org.bson.Document;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import io.realm.mongodb.App;
 import io.realm.mongodb.Credentials;
 import io.realm.mongodb.User;
@@ -32,7 +34,6 @@ public class RegActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reg);
-
         radio1=findViewById(R.id.radio_one);
         radio2=findViewById(R.id.radio_two);
         radioGroup=findViewById(R.id.radioGroup);
@@ -80,6 +81,11 @@ public class RegActivity extends AppCompatActivity {
     }
     private final void onLoginSuccess(){
         // po udanym zarejestrowaniu przenosi uzytkownika do fragmentu tablica.
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         RegActivity.this.addDocument();
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
@@ -94,31 +100,33 @@ public class RegActivity extends AppCompatActivity {
 
     // Funcja umożliwiająca przypisanie kontu dodatkowych wartości w postaci pseudonimu oraz typu.
     private void addDocument(){
+        Log.v("TAG(5)", "add document");
         user = MainActivity.myApp.currentUser();
         Functions functionsManager =MainActivity.myApp.getFunctions(user);
         List<String> myList = Arrays.asList(textpseudonimreg.getText().toString());
         if(radio2.isChecked()){
             functionsManager.callFunctionAsync("NowyDokument", myList,Document.class, (App.Callback) result -> {
                 if(result.isSuccess()){
-                    Log.v("TAG()", "utworzono"+ (Document)result.get());
+                    Log.v("TAG(1)", "utworzono"+ (Document)result.get());
 
                 }
                 else{
-                    Log.v("TAG()", "nie utworzono"+ result.getError());
+                    Log.v("TAG(2)", "nie utworzono"+ result.getError());
                 }
             });
         }
         else {
             functionsManager.callFunctionAsync("NowyDokument2", myList,Document.class, (App.Callback) result -> {
                 if(result.isSuccess()){
-                    Log.v("TAG()", "utworzono"+ (Document)result.get());
+                    Log.v("TAG(3)", "utworzono"+ (Document)result.get());
 
                 }
                 else{
-                    Log.v("TAG()", "nie utworzono"+ result.getError());
+                    Log.v("TAG(4)", "nie utworzono"+ result.getError());
                 }
             });
         }
+        Log.v("TAG(6)", "add document");
     }
 
     //funkcja rejestrujaca uzytkownika
@@ -145,7 +153,9 @@ public class RegActivity extends AppCompatActivity {
                     RegActivity.this.onRegFailed(result.getError().getErrorMessage());
                     Log.e("Reg activity", "Nie udało się zarejestrować");
                     Log.v("TAG()", "nie utworzono"+ result.getError());
+
                 } else {
+
                     Log.i("Reg activity", "Zarejestrowano");
                     Intent intent = new Intent(getBaseContext(), LogActivity.class);
                     startActivity(intent);
