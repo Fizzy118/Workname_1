@@ -92,10 +92,12 @@ public class FragDodaj extends Fragment {
 
                 Functions functionsManager = MainActivity.myApp.getFunctions(user);
                 List<String> myList = Arrays.asList("000111");
-               functionsManager.callFunctionAsync("getLatitude", myList, Double.class, (App.Callback) result -> {
+               functionsManager.callFunctionAsync("getLocalization", myList, ArrayList.class, (App.Callback) result -> {
             if (result.isSuccess()) {
-                Log.v("TAG()", "dodano kogos " + (Double) result.get());
+                Log.v("TAG()", "dodano kogos " + (ArrayList) result.get());
                 Toast.makeText(getContext(), "Dodano użytkownika", Toast.LENGTH_LONG).show();
+                ArrayList eee = (ArrayList) result.get();
+                Log.v("TAG()", "dodano kogos " + eee.get(0));
             } else {
                 Log.v("TAG(1)", "niedodano kogos " + result.get());
                 Toast.makeText(getContext(), "Wystąpił błąd: " + result.getError(), Toast.LENGTH_LONG).show();

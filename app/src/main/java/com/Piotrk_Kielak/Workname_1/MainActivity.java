@@ -1,5 +1,10 @@
 package com.Piotrk_Kielak.Workname_1;
 
+import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,9 +20,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -33,7 +40,9 @@ import androidx.navigation.ui.NavigationUI;
 import com.Piotrk_Kielak.Workname_1.Model.Opieka;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.bson.Document;
@@ -41,6 +50,9 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -56,8 +68,8 @@ import io.realm.mongodb.functions.Functions;
 public class MainActivity extends AppCompatActivity {
 
     //zmiennne uzytkownika
-    private Boolean typKonta=null; //?????????????
-    private String[] numerUzytkownika;
+    private Boolean typKonta = null; //?????????????
+    private ArrayList numerUzytkownika;
     private ArrayList arrayList;
     private User user = null;
     private Realm realm_main;
@@ -82,26 +94,28 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private double latitude = 0;
     private double longitude = 0;
+    private ScheduledExecutorService scheduler;
 
     //odlicza 30min od ostatniego ruchu telefonu
-    public CountDownTimer cdt = new CountDownTimer(1800000, 1000){
-        public void onFinish(){
+    public CountDownTimer cdt = new CountDownTimer(1800000, 1000) {
+        public void onFinish() {
             sendSms();
-            count_cdt =false;
+            count_cdt = false;
         }
+
         public void onTick(long millisUntilFinished) {
             Log.v("tag", String.valueOf(millisUntilFinished / 1000));
         }
     };
     // TODO: upewnić się że timer dobrze ustawiony (0,3sec)
     //odlicza czas po spełnienu warunku akcelerometru
-    public CountDownTimer fall_timer = new CountDownTimer(3000, 1000){
-        public void onFinish(){
+    public CountDownTimer fall_timer = new CountDownTimer(3000, 1000) {
+        public void onFinish() {
             Log.v("fall timer", String.valueOf(gyroCurrentValue));
-            if(gyroCurrentValue>3.5){
+            if (gyroCurrentValue > 3.5) {
                 alert_timer.start();
                 //wiadomość o chęci wysłania powiadomienia
-                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainActivity.this,"Fall notification");
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainActivity.this, "Fall notification");
                 notificationBuilder.setContentTitle("Wykryto zagrożenie!");
                 notificationBuilder.setContentText("Aby nie wysyłać wiadomości, zareaguj.");
                 notificationBuilder.setSmallIcon(R.drawable.ic_launcher_foreground);
@@ -109,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
 
                 NotificationManagerCompat managerCompat = NotificationManagerCompat.from(MainActivity.this);
-                managerCompat.notify(111,notificationBuilder.build());
+                managerCompat.notify(111, notificationBuilder.build());
                 //alert
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                 alertDialogBuilder.setCancelable(false);
@@ -123,64 +137,69 @@ public class MainActivity extends AppCompatActivity {
                         alert_timer.cancel();
                     }
                 });
-                    alertDialogBuilder.show();
-            };
+                alertDialogBuilder.show();
+            }
+            ;
         }
+
         public void onTick(long millisUntilFinished) {
         }
     };
 
     //odlicza minutę od upadku
-    public CountDownTimer alert_timer = new CountDownTimer(60000, 1000){
-        public void onFinish(){
+    public CountDownTimer alert_timer = new CountDownTimer(60000, 1000) {
+        public void onFinish() {
             Log.v("alert timer", "Wiadomość wysłana");
             sendSms();
         }
+
         public void onTick(long millisUntilFinished) {
             Log.v("alert_timer", String.valueOf(millisUntilFinished / 1000));
         }
     };
     // Jeśli telefon jest w bezruchu, zaczyna odliczanie 30min do wysłania wiadomości.
-    private SensorEventListener sensorAccEventListner=new SensorEventListener(){
+    private SensorEventListener sensorAccEventListner = new SensorEventListener() {
         @Override
-        public void onSensorChanged(SensorEvent sensorEvent){
+        public void onSensorChanged(SensorEvent sensorEvent) {
 
             float ax = sensorEvent.values[0];
             float ay = sensorEvent.values[1];
             float az = sensorEvent.values[2];
 
-            accelerationCurrentValue = Math.sqrt((ax*ax+ay*ay+az*az));
+            accelerationCurrentValue = Math.sqrt((ax * ax + ay * ay + az * az));
 
-            if(accelerationCurrentValue<4.5){
+            if (accelerationCurrentValue < 4.5) {
                 Log.v("tag", "acc < 4.5");
                 fall_timer.start();
             }
 
-            if(accelerationCurrentValue<9 || accelerationCurrentValue>10){
+            if (accelerationCurrentValue < 9 || accelerationCurrentValue > 10) {
                 Log.v("tag", "wykryto ruch, reset timera");
-                count_cdt =false;
+                count_cdt = false;
                 cdt.cancel();
                 cdt.start();
-                count_cdt =true;
+                count_cdt = true;
             }
         }
+
         @Override
-        public  void onAccuracyChanged(Sensor sensor, int i){
+        public void onAccuracyChanged(Sensor sensor, int i) {
 
         }
     };
 
-    private SensorEventListener sensorGyroEventListner=new SensorEventListener(){
+    private SensorEventListener sensorGyroEventListner = new SensorEventListener() {
         @Override
-        public void onSensorChanged(SensorEvent sensorEvent){
+        public void onSensorChanged(SensorEvent sensorEvent) {
 
-                float gx = sensorEvent.values[0];
-                float gy = sensorEvent.values[1];
-                float gz = sensorEvent.values[2];
-                gyroCurrentValue = Math.sqrt((gx * gx + gy * gy));
+            float gx = sensorEvent.values[0];
+            float gy = sensorEvent.values[1];
+            float gz = sensorEvent.values[2];
+            gyroCurrentValue = Math.sqrt((gx * gx + gy * gy));
         }
+
         @Override
-        public  void onAccuracyChanged(Sensor sensor, int i){
+        public void onAccuracyChanged(Sensor sensor, int i) {
         }
     };
 
@@ -189,11 +208,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        scheduler = Executors.newScheduledThreadPool(1);
+
         //inicjalizacja realm app
         Realm.init(this);
         myApp = new App(new AppConfiguration.Builder(Appid).build());
         String realmName = "My Project";
+        user = myApp.currentUser();
+
+        Log.v("onCreate", "fusedLocationClient");
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         //RealmConfiguration config = new RealmConfiguration.Builder().allowQueriesOnUiThread();
 
         //Realm.setDefaultConfiguration(Realm.getDefaultConfiguration());
@@ -211,19 +237,17 @@ public class MainActivity extends AppCompatActivity {
 //        Realm.setDefaultConfiguration(realmConfig);
 
         //kanał powiadomien
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("Fall notification", "App notifications", NotificationManager.IMPORTANCE_HIGH);
             NotificationManager manager = getSystemService((NotificationManager.class));
             manager.createNotificationChannel(channel);
         }
 
-        user = myApp.currentUser();
-        if (user == null){
+        //sprawdza czy użytkownik został podany oraz sprawdza typ użytkownika
+        if (user == null) {
             Intent intent = new Intent(this, LogActivity.class);
             this.startActivity(intent);
-        }
-        else {
-            getLocalization();
+        } else {
             Functions functionsManager = myApp.getFunctions(user);
             List<String> myList = Arrays.asList("");
             functionsManager.callFunctionAsync("getTyp", myList, Boolean.class, (App.Callback) result -> {
@@ -238,19 +262,24 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-//        if(typKonta==false) {
-//            functionsManager.callFunctionAsync("getNumberOpiekuna", myList, ArrayList.class, (App.Callback) result -> {
-//                if (result.isSuccess()) {
-//                    arrayList = (ArrayList) result.get();
-//                } else {
-//                    Log.v("TAG()", "blad podczas pobierania numeru" + result.getError());
-//                }
-//            });
-//        }
+//          TODO: usunąć
+            typKonta = true;
 
+            if(typKonta == true){
+                Log.v("sendLocalization", "wywołane");
+                sendLocalization();
 
-//          TODO: ustaiwc zmiennna globalna opisujaca typ konta
-            typKonta=false;
+                //funkcja pobierająca numery i zapisujaca w zmiennej
+                functionsManager.callFunctionAsync("getNumber", myList, ArrayList.class, (App.Callback) result -> {
+                    if (result.isSuccess()) {
+                        Log.v("getNumber", "pobrano numery " + (ArrayList) result.get());
+                        numerUzytkownika = (ArrayList) result.get();
+                    } else {
+                        Log.v("getNumber", "niepobrano numerow " + result.get());
+                    }
+
+                });
+            }
 
             //implementacja gornego paska
             toolbar = findViewById(R.id.my_toolbar);
@@ -265,101 +294,119 @@ public class MainActivity extends AppCompatActivity {
             Log.v("TAG", "konto jest" + typKonta);
 
             //generowanie sensorów jeżeli konto jest podopiecznego
-            if (typKonta == false) {
+            if (typKonta == true) {
                 mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
                 mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-                if(mGyroscope == null){
+                if (mGyroscope == null) {
                     Log.v("TAG", "Gryro null");
                 }
                 mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
                 mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
 
-                if(mAccelerometr == null){
+                if (mAccelerometr == null) {
                     Log.v("TAG", "Acc null");
                 }
             }
         }
     }
 
-//    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Boolean a = intent.getBooleanExtra("wykryto", false);
-//            Log.i("tag", String.valueOf(a));
-//            SharedPreferences sharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-//            sharedPreferences.edit().apply();
-//        }
-//    };
 
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 //        mSensorManager.registerListener(sensorAccEventListner,mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
-   //     mSensorManager.registerListener(sensorGyroEventListner,mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-       // registerReceiver(broadcastReceiver,new IntentFilter((Upadek.UPADEK)));
+        //     mSensorManager.registerListener(sensorGyroEventListner,mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        // registerReceiver(broadcastReceiver,new IntentFilter((Upadek.UPADEK)));
     }
 
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
-       // unregisterReceiver(broadcastReceiver);
-       // mSensorManager.unregisterListener(sensorAccEventListner);
+        // unregisterReceiver(broadcastReceiver);
+        // mSensorManager.unregisterListener(sensorAccEventListner);
         //mSensorManager.unregisterListener(sensorGyroEventListner);
     }
-    protected void onDestroy(){
+
+    protected void onDestroy() {
         super.onDestroy();
 
-       // stopService(new Intent(this,Upadek.class));
+        // stopService(new Intent(this,Upadek.class));
     }
 
     //Funkcja wysyłająca powiadomienie do opiekuna
 
-        private void sendSms () {
+    private void sendSms() {
         SmsManager smsManager = SmsManager.getDefault();
-            int a = arrayList.size();
-            for(int i=0; i<a; i++){
-                smsManager.sendTextMessage(numerUzytkownika[i], null, "Wykryto potencjalne zagrożenie." +
-                        " Skontaktuj się z użytkownikiem tego numeru", null, null);
-                Toast.makeText(this, "Wysłano powiadomienie do opiekuna", Toast.LENGTH_LONG).show();
-            }
-    }
-    //Funcja pobiera lokalizacje i wysyła ją do bazy danych
-    private void getLocalization(){
-        Log.v("getLocalization", "start");
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.v("getLocalization", "udzielony dostęp");
-
-        }else{
-            Log.v("getLocalization", "nie udzielony dostęp");
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        int a = numerUzytkownika.size();
+        for (int i = 0; i < a; i++) {
+            smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Wykryto potencjalne zagrożenie." +
+                    " Skontaktuj się z użytkownikiem tego numeru", null, null);
+            Toast.makeText(this, "Wysłano powiadomienie do opiekuna", Toast.LENGTH_LONG).show();
         }
+    }
 
-        //TODO dokonczyc to
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        Log.v("getLocalization", "location null");
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            latitude=location.getLatitude();
-                            longitude=location.getLongitude();
-                            Log.v("getLocalization", "latlong"+ latitude + longitude);
 
-                            // Logic to handle location object
-                        }
-                    }
-                });
-        Log.v("getLocalization", "half");
-        Functions functionsManager = MainActivity.myApp.getFunctions(user);
-        List<Double> myList = Arrays.asList(latitude,longitude);
-        functionsManager.callFunctionAsync("changeLocalization", myList, Document .class, (App.Callback) result -> {
-            if (result.isSuccess()) {
-                Log.v("getLocalization", "pobrano lokalizacje " + (Document) result.get());
-            } else {
-                Log.v("getLocalization", "błąd: nie pobrano lokalizacji " + result.get());
+
+    //Funcja pobiera lokalizacje i wysyła ją do bazy danych
+    private void getLocalization() {
+        Log.v("getLocalization", "start");
+        if (checkPermissions()) {
+            Log.v("getLocalization", "udzielony dostęp");
+            if (isLocationEnabled()) {
+                Log.v("isLocationEnabled", "udzielony dostęp");
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { }
+                fusedLocationClient.getLastLocation()
+                        .addOnCompleteListener(new OnCompleteListener<Location>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Location> task) {
+                                Location location = task.getResult();
+                                if (location == null) {
+                                    Log.v("getLocalization", "location null");
+                                } else {
+                                    latitude = location.getLatitude();
+                                    longitude = location.getLongitude();
+                                    Log.v("getLocalization", "location" + latitude + longitude);
+                                    Functions functionsManager = MainActivity.myApp.getFunctions(user);
+                                    List<Double> myList = Arrays.asList(latitude,longitude);
+                                    functionsManager.callFunctionAsync("changeLocalization", myList, Document .class, (App.Callback) result -> {
+                                        if (result.isSuccess()) {
+                                            Log.v("getLocalization", "pobrano lokalizacje " + (Document) result.get());
+                                        } else {
+                                            Log.v("getLocalization", "błąd: nie pobrano lokalizacji " + result.get());
+                                        }
+                                    });
+                                }
+                            }
+
+                        });
+            } else{
+            Log.v("getLocalization", "nie udzielony dostęp");
+            Toast.makeText(this, "Please turn on" + " your location...", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
             }
+        } else{
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+        }
+        if(isLocationEnabled()){
+            Log.v("isLocationEnabled", "udzielony dostęp");
+        }
+    }
+    private boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(this.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+    private boolean checkPermissions() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
 
-        });
+    //funkcja wywołująca lokalizacje co określony odstep czasowy (5min)
+    public void sendLocalization() {
+        Runnable getterLocalization = () -> getLocalization();
+        ScheduledFuture<?> getterHandle =
+                scheduler.scheduleAtFixedRate(getterLocalization, 0, 5, MINUTES);
+        Log.v("sendLocalization", "wysłane");
     }
 }
