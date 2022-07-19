@@ -1,8 +1,8 @@
 package com.Piotrk_Kielak.Workname_1;
 
-import static java.util.concurrent.TimeUnit.HOURS;
+
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,15 +33,16 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
-import com.Piotrk_Kielak.Workname_1.Model.Opieka;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -55,7 +56,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.mongodb.App;
 import io.realm.mongodb.AppConfiguration;
 import io.realm.mongodb.User;
@@ -68,11 +68,10 @@ import io.realm.mongodb.functions.Functions;
 public class MainActivity extends AppCompatActivity {
 
     //zmiennne uzytkownika
-    private Boolean typKonta = null; //?????????????
+    private Boolean typKonta = null;
     private ArrayList numerUzytkownika;
-    private ArrayList arrayList;
     private User user = null;
-    private Realm realm_main;
+
 
     //zmienne realm
     public static App myApp;
@@ -107,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             Log.v("tag", String.valueOf(millisUntilFinished / 1000));
         }
     };
-    // TODO: upewnić się że timer dobrze ustawiony (0,3sec)
+
     //odlicza czas po spełnienu warunku akcelerometru
     public CountDownTimer fall_timer = new CountDownTimer(3000, 1000) {
         public void onFinish() {
@@ -220,21 +219,12 @@ public class MainActivity extends AppCompatActivity {
         Log.v("onCreate", "fusedLocationClient");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        //RealmConfiguration config = new RealmConfiguration.Builder().allowQueriesOnUiThread();
-
-        //Realm.setDefaultConfiguration(Realm.getDefaultConfiguration());
-        //Realm backgroundThreadRealm = Realm.getInstance(config);
-
-
-//        RealmConfiguration realmConfig = new RealmConfiguration.Builder()
-//                .initialData(new Realm.Transaction() {
-//                    @Override
-//                    public void execute(Realm realm) {
-//                        realm.createObject(User.class);
-//                    }})
-//                .build();
-//        Realm.deleteRealm(realmConfig); // Delete Realm between app restarts.
-//        Realm.setDefaultConfiguration(realmConfig);
+        //dostęp do sms
+        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED){
+            Log.v("SEND SMS", "przyznane");
+        }else{
+            requestPermissions(new String[]{Manifest.permission.SEND_SMS},101);
+        }
 
         //kanał powiadomien
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -254,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 if (result.isSuccess()) {
                     //Log.v("TAG()", "typ konta: " + (Boolean) result.get());
                     typKonta = (Boolean) result.get();
-                    Log.v("MainActivity", "podano typp konta " + typKonta);
+                    Log.v("MainActivity", "podano typ konta " + typKonta);
                 } else {
                     Log.v("MainActivity", "blad podczas pobierania typu" + result.getError());
                 }
@@ -277,24 +267,8 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Log.v("getNumber", "niepobrano numerow " + result.get());
                     }
-
                 });
-            }
-
-            //implementacja gornego paska
-            toolbar = findViewById(R.id.my_toolbar);
-            setSupportActionBar(toolbar);
-
-            //implementacja dolnego menu
-            bottomNav = findViewById(R.id.bottomNavigationView);
-            navController = Navigation.findNavController(this, R.id.fragmentContainerView2);
-            NavigationUI.setupWithNavController(bottomNav, navController);
-
-            //inicjalizacja sensora
-            Log.v("TAG", "konto jest" + typKonta);
-
-            //generowanie sensorów jeżeli konto jest podopiecznego
-            if (typKonta == true) {
+                //generowanie sensorów jeżeli konto jest podopiecznego
                 mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
                 mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -309,40 +283,43 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("TAG", "Acc null");
                 }
             }
+
+            //implementacja gornego paska
+            toolbar = findViewById(R.id.my_toolbar);
+            setSupportActionBar(toolbar);
+
+            //implementacja dolnego menu
+            bottomNav = findViewById(R.id.bottomNavigationView);
+            navController = Navigation.findNavController(this, R.id.fragmentContainerView2);
+            NavigationUI.setupWithNavController(bottomNav, navController);
+
+            //inicjalizacja sensora
+            Log.v("TAG", "konto jest" + typKonta);
+
         }
     }
 
-
     protected void onResume() {
         super.onResume();
-//        mSensorManager.registerListener(sensorAccEventListner,mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
-        //     mSensorManager.registerListener(sensorGyroEventListner,mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        // registerReceiver(broadcastReceiver,new IntentFilter((Upadek.UPADEK)));
     }
 
     protected void onPause() {
         super.onPause();
-        // unregisterReceiver(broadcastReceiver);
-        // mSensorManager.unregisterListener(sensorAccEventListner);
-        //mSensorManager.unregisterListener(sensorGyroEventListner);
     }
 
     protected void onDestroy() {
         super.onDestroy();
-
-        // stopService(new Intent(this,Upadek.class));
     }
 
     //Funkcja wysyłająca powiadomienie do opiekuna
-
     private void sendSms() {
         SmsManager smsManager = SmsManager.getDefault();
         int a = numerUzytkownika.size();
         for (int i = 0; i < a; i++) {
             smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Wykryto potencjalne zagrożenie." +
                     " Skontaktuj się z użytkownikiem tego numeru", null, null);
-            Toast.makeText(this, "Wysłano powiadomienie do opiekuna", Toast.LENGTH_LONG).show();
         }
+        Toast.makeText(this, "Wysłano powiadomienie do opiekuna", Toast.LENGTH_LONG).show();
     }
 
 
@@ -388,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
         } else{
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+                    Manifest.permission.ACCESS_FINE_LOCATION}, 101);
         }
         if(isLocationEnabled()){
             Log.v("isLocationEnabled", "udzielony dostęp");
@@ -406,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
     public void sendLocalization() {
         Runnable getterLocalization = () -> getLocalization();
         ScheduledFuture<?> getterHandle =
-                scheduler.scheduleAtFixedRate(getterLocalization, 0, 5, MINUTES);
+                scheduler.scheduleAtFixedRate(getterLocalization, 0, 3, MINUTES);
         Log.v("sendLocalization", "wysłane");
     }
 }

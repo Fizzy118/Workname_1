@@ -54,13 +54,11 @@ public class LogActivity extends AppCompatActivity{
         // po udanym zalogowaniu przejść do fragmentu tablica
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano!", Toast.LENGTH_LONG).show();
-        // TODO: zmienic na frag_tablica
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
         startActivity(intent);
     }
 
     private final void onLoginFailed(String errormsg) {
-       // Log.e(TAG(), errormsg);
         Toast.makeText(this.getBaseContext(), errormsg, Toast.LENGTH_LONG).show();
     }
 

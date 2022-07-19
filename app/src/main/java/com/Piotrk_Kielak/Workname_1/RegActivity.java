@@ -65,7 +65,6 @@ public class RegActivity extends AppCompatActivity {
         this.moveTaskToBack(true);
     }
     private final void onRegFailed(String errormsg) {
-        // Log.e(TAG(), errormsg);
         Toast.makeText(this.getBaseContext(), errormsg, Toast.LENGTH_LONG).show();
     }
 
@@ -80,16 +79,15 @@ public class RegActivity extends AppCompatActivity {
         }
     }
     private final void onLoginSuccess(){
-        // po udanym zarejestrowaniu przenosi uzytkownika do fragmentu tablica.
+        // po udanym zarejestrowaniu przenosi uzytkownika.
         try {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         RegActivity.this.addDocument();
         this.finish();
         Toast.makeText(this.getBaseContext(), "Zalogowano", Toast.LENGTH_LONG).show();
-        // TODO: zmienic na frag_tablice
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
         startActivity(intent);
     }

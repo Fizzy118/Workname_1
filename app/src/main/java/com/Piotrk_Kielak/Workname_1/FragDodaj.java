@@ -13,16 +13,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import org.bson.Document;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmList;
-import io.realm.RealmResults;
-import io.realm.Sort;
 import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
@@ -39,9 +33,7 @@ public class FragDodaj extends Fragment {
     private ImageButton button2;
     private EditText editText;
     private Boolean typ;
-    ArrayList arrayList;
-    private ArrayList<com.Piotrk_Kielak.Workname_1.Model.User> pep;
-    private Realm realm;
+
 
     public FragDodaj() {
         // Required empty public constructor

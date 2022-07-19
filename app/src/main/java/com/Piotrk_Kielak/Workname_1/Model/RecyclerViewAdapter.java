@@ -13,17 +13,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.Piotrk_Kielak.Workname_1.FragTablica;
-import com.Piotrk_Kielak.Workname_1.LogActivity;
+
 import com.Piotrk_Kielak.Workname_1.MainActivity;
 import com.Piotrk_Kielak.Workname_1.MapsActivity;
 import com.Piotrk_Kielak.Workname_1.R;
-import com.Piotrk_Kielak.Workname_1.RegActivity;
+import com.Piotrk_Kielak.Workname_1.ZadActivity;
 
 import org.bson.Document;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,6 +69,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
 
+        holder.tasks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ZadActivity.class);
+                intent.putExtra("message_key_number", list.get(p).get("name",String.class));
+                context.startActivity(intent);
+            }
+        });
 
     }
 
@@ -125,17 +131,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 Log.v("showMap", "nie pobrano lokalizacje z realm  " + result.get());
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

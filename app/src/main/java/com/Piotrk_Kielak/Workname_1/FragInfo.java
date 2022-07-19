@@ -1,6 +1,5 @@
 package com.Piotrk_Kielak.Workname_1;
 
-import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;

@@ -14,8 +14,11 @@ import android.widget.Toast;
 import org.bson.Document;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import io.realm.Realm;
+import java.util.concurrent.TimeUnit;
+
+
 import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
@@ -26,8 +29,8 @@ import io.realm.mongodb.functions.Functions;
  */
 public class FragProfil extends Fragment {
 
-    private User user = null;
-    private Realm userRealm;
+    private String name;
+    private User user;
     private EditText numer, nick, haslo;
     private ImageButton buttonNumer, buttonHaslo, buttonNick;
 
@@ -50,22 +53,19 @@ public class FragProfil extends Fragment {
             Intent intent = new Intent(getContext(), LogActivity.class);
             this.startActivity(intent);
         }
-        else{
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_frag_profil,container,false);
-        //button= v.findViewById(R.id.button23);
         numer=v.findViewById(R.id.textNumeredit);
         nick=v.findViewById(R.id.textNickEdit);
         haslo=v.findViewById(R.id.textHasloedit);
         buttonNick=v.findViewById(R.id.updateNick);
         buttonNumer=v.findViewById(R.id.updateNurmer);
         buttonHaslo=v.findViewById(R.id.updateHaslo);
-        //Functions functionsManager =MainActivity.myApp.getFunctions(user);
+
 
         // Funkcja odpowiadajaca za zmiane pseudonium uzytkownika
         buttonNick.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +100,22 @@ public class FragProfil extends Fragment {
             public void onClick(View v) {
                 // sprawdzenie czy pole tekstowe nie jest puste.
                 if (haslo.getText().toString().trim().length() > 0) {
-                    MainActivity.myApp.getEmailPassword().callResetPasswordFunction("21372137",haslo.getText().toString());
+                    Object[] arguments = {};
+                    getName();
+                    try {
+                        TimeUnit.SECONDS.sleep(2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    MainActivity.myApp.getEmailPassword().callResetPasswordFunctionAsync("120444", haslo.getText().toString(),arguments,(App.Callback) result -> {
+                        if (result.isSuccess()) {
+                            Log.v("callResetPasswordFunctionAsync", "Hasło zostało zmienione" + result.get());
+                            Toast.makeText(getContext(), "Hasło zostało zmienione", Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.v("callResetPasswordFunctionAsync", "Nie udało się zminić hasła" + result.getError());
+                            Toast.makeText(getContext(), "Wystąpił błąd ", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
                 else {
                     Toast.makeText(getContext(), "Pole 'hasło' jest puste", Toast.LENGTH_LONG).show();
@@ -134,5 +149,17 @@ public class FragProfil extends Fragment {
             }
         });
         return v;
+    }
+    public String getName(){
+        Functions functionsManager = MainActivity.myApp.getFunctions(MainActivity.myApp.currentUser());
+        functionsManager.callFunctionAsync("getName", Collections.singletonList(""), String.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                Log.v("getName", "pobrano numer " + (String) result.get());
+                name = (String) result.get();
+            } else {
+                Log.v("getName", "nie pobrano numeru " + result.get());
+            }
+        });
+        return name;
     }
 }

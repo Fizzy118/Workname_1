@@ -3,31 +3,18 @@ package com.Piotrk_Kielak.Workname_1;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.Piotrk_Kielak.Workname_1.Model.RecyclerViewAdapter;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.Piotrk_Kielak.Workname_1.databinding.ActivityMapsBinding;
-import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -66,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-            // Add a marker in Sydney and move the camera
+
         Intent intent = getIntent();
         latitude = intent.getDoubleExtra("message_key_lat", 1);
         longitude = intent.getDoubleExtra("message_key_long",1);

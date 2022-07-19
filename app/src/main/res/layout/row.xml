@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="56dp"
-    android:layout_width="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="25dp">
+
     <TextView
-        android:id="@+id/textview"
+        android:id="@+id/textView_oneTask"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_toLeftOf="@+id/checkBox" android:layout_toStartOf="@+id/checkBox"/>
-    <CheckBox
-        android:id="@+id/checkBox"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="15dp"
+        android:layout_toStartOf="@+id/textView_TaskMaster"
+        android:textSize="14sp" />
+
+
+    <TextView
+        android:id="@+id/textView_TaskMaster"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="15dp"
+        android:layout_toStartOf="@+id/delete_button_task"
+        android:textSize="9sp" />
+
+    <ImageButton
+        android:id="@+id/delete_button_task"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_alignBaseline="@+id/textview"
-        android:layout_alignBottom="@+id/textview" android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/ic_baseline_delete_24" />
 </RelativeLayout>

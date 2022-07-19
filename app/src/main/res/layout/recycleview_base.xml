@@ -6,12 +6,11 @@
     android:padding="15dp">
 
     <TextView
+        android:id="@+id/person_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/person_name"
         android:layout_centerVertical="true"
-        android:textSize="17sp"
-        />
+        android:textSize="25sp" />
 
     <ImageButton
         android:id="@+id/map_button"
