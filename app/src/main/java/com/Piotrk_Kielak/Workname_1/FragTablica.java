@@ -133,9 +133,13 @@ public class FragTablica extends Fragment {
             }
 
             if(user_list==null) {
-                Toast.makeText(getContext(), "Nikogo nie dodano.", Toast.LENGTH_LONG).show();
-            }
-            else{
+                if (user_list.size() == 0) {
+                    Toast.makeText(getContext(), "Nikogo nie dodano.", Toast.LENGTH_LONG).show();
+                }
+            }else{
+                if (user_list.size() == 0) {
+                    Toast.makeText(getContext(), "Brak przypomnień.", Toast.LENGTH_LONG).show();
+                }
                     recyclerView.setLayoutManager(
                             new LinearLayoutManager(getActivity().getApplicationContext()));
                     RecyclerViewAdapter adapter = new RecyclerViewAdapter(getActivity(), user_list);
@@ -157,11 +161,14 @@ public class FragTablica extends Fragment {
                     } else {
                         Log.v("setUpRecyclerViewTask", "błąd: " + result.get());
                     }
-
                     if(user_list==null) {
-                        Toast.makeText(getContext(), "Brak przypomnień.", Toast.LENGTH_LONG).show();
-                    }
-                    else{
+                        if (user_list.size() == 0) {
+                            Toast.makeText(getContext(), "Brak przypomnień.", Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        if (user_list.size() == 0) {
+                            Toast.makeText(getContext(), "Brak przypomnień.", Toast.LENGTH_LONG).show();
+                        }
                         recyclerView.setLayoutManager(
                                 new LinearLayoutManager(getActivity().getApplicationContext()));
                         RecyclerViewAdapterTasks adapter = new RecyclerViewAdapterTasks(getActivity(), user_list);

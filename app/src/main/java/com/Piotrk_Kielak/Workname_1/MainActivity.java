@@ -50,6 +50,7 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,7 +69,7 @@ import io.realm.mongodb.functions.Functions;
 public class MainActivity extends AppCompatActivity {
 
     //zmiennne uzytkownika
-    private Boolean typKonta = null;
+    private Boolean typKonta;
     private ArrayList numerUzytkownika;
     private User user = null;
 
@@ -238,51 +239,41 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LogActivity.class);
             this.startActivity(intent);
         } else {
-            Functions functionsManager = myApp.getFunctions(user);
-            List<String> myList = Arrays.asList("");
-            functionsManager.callFunctionAsync("getTyp", myList, Boolean.class, (App.Callback) result -> {
-                if (result.isSuccess()) {
-                    //Log.v("TAG()", "typ konta: " + (Boolean) result.get());
-                    typKonta = (Boolean) result.get();
-                    Log.v("MainActivity", "podano typ konta " + typKonta);
-                } else {
-                    Log.v("MainActivity", "blad podczas pobierania typu" + result.getError());
-                }
-            });
+                getType();
+
 
 
 
 //          TODO: usunąć
-            typKonta = true;
+            //typKonta = true;
 
-            if(typKonta == true){
-                Log.v("sendLocalization", "wywołane");
-                sendLocalization();
-
-                //funkcja pobierająca numery i zapisujaca w zmiennej
-                functionsManager.callFunctionAsync("getNumber", myList, ArrayList.class, (App.Callback) result -> {
-                    if (result.isSuccess()) {
-                        Log.v("getNumber", "pobrano numery " + (ArrayList) result.get());
-                        numerUzytkownika = (ArrayList) result.get();
-                    } else {
-                        Log.v("getNumber", "niepobrano numerow " + result.get());
-                    }
-                });
-                //generowanie sensorów jeżeli konto jest podopiecznego
-                mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-                mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-                if (mGyroscope == null) {
-                    Log.v("TAG", "Gryro null");
-                }
-                mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
-                mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-
-                if (mAccelerometr == null) {
-                    Log.v("TAG", "Acc null");
-                }
-            }
+//            if(getType() == true){
+//                sendLocalization();
+//
+//                //funkcja pobierająca numery i zapisujaca w zmiennej
+//                functionsManager.callFunctionAsync("getNumber", Collections.singletonList(""), ArrayList.class, (App.Callback) result -> {
+//                    if (result.isSuccess()) {
+//                        Log.v("getNumber", "pobrano numery " + (ArrayList) result.get());
+//                        numerUzytkownika = (ArrayList) result.get();
+//                    } else {
+//                        Log.v("getNumber", "niepobrano numerow " + result.get());
+//                    }
+//                });
+//                //generowanie sensorów jeżeli konto jest podopiecznego
+//                mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+//
+//                mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//                mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//                if (mGyroscope == null) {
+//                    Log.v("MainActivity", "Gryro null");
+//                }
+//                mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
+//                mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+//
+//                if (mAccelerometr == null) {
+//                    Log.v("MainActivity", "Acc null");
+//                }
+//            }
 
             //implementacja gornego paska
             toolbar = findViewById(R.id.my_toolbar);
@@ -292,10 +283,6 @@ public class MainActivity extends AppCompatActivity {
             bottomNav = findViewById(R.id.bottomNavigationView);
             navController = Navigation.findNavController(this, R.id.fragmentContainerView2);
             NavigationUI.setupWithNavController(bottomNav, navController);
-
-            //inicjalizacja sensora
-            Log.v("TAG", "konto jest" + typKonta);
-
         }
     }
 
@@ -385,5 +372,54 @@ public class MainActivity extends AppCompatActivity {
         ScheduledFuture<?> getterHandle =
                 scheduler.scheduleAtFixedRate(getterLocalization, 0, 3, MINUTES);
         Log.v("sendLocalization", "wysłane");
+    }
+
+    // Funkcja zwracająca typ użytkownika
+    public Boolean getType(){
+        this.user = MainActivity.myApp.currentUser();
+        Functions functionsManager = MainActivity.myApp.getFunctions(user);
+        functionsManager.callFunctionAsync("getTyp", Collections.singletonList(""), Boolean.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                //Log.v("TAG()", "typ konta: " + (Boolean) result.get());
+                typKonta = (Boolean) result.get();
+                if(typKonta==true){
+                    setForCharge();
+                }
+                Log.v("MainActivity", "podano typ konta " + typKonta);
+
+            } else {
+                Log.v("MainActivity", "blad podczas pobierania typu" + result.getError());
+            }
+        });
+        return  typKonta;
+    }
+
+    private void setForCharge(){
+            sendLocalization();
+            this.user = MainActivity.myApp.currentUser();
+            Functions functionsManager = MainActivity.myApp.getFunctions(user);
+            //funkcja pobierająca numery i zapisujaca w zmiennej
+            functionsManager.callFunctionAsync("getNumber", Collections.singletonList(""), ArrayList.class, (App.Callback) result -> {
+                if (result.isSuccess()) {
+                    Log.v("getNumber", "pobrano numery " + (ArrayList) result.get());
+                    numerUzytkownika = (ArrayList) result.get();
+                } else {
+                    Log.v("getNumber", "niepobrano numerow " + result.get());
+                }
+            });
+            //generowanie sensorów jeżeli konto jest podopiecznego
+            mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+            mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            if (mGyroscope == null) {
+                Log.v("MainActivity", "Gryro null");
+            }
+            mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+
+            if (mAccelerometr == null) {
+                Log.v("MainActivity", "Acc null");
+            }
     }
 }

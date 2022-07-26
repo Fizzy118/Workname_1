@@ -131,14 +131,14 @@ public class FragProfil extends Fragment {
                 // sprawdzenie czy pole tekstowe nie jest puste.
                 if (numer.getText().toString().trim().length() > 0){
                     Functions functionsManager =MainActivity.myApp.getFunctions(user);
-                    List<String> myList = Arrays.asList(numer.getText().toString());
+                    List<String> myList2 = Arrays.asList(numer.getText().toString());
 
-                    functionsManager.callFunctionAsync("changeNumber", myList, Document.class, (App.Callback) result -> {
+                    functionsManager.callFunctionAsync("changeNumber", myList2, Document.class, (App.Callback) result -> {
                         if (result.isSuccess()) {
-                            Log.v("TAG()", "Nazwa została zmieniona" + (Document) result.get());
-                            Toast.makeText(getContext(), "Nazwa została zmieniona", Toast.LENGTH_LONG).show();
+                            Log.v("changeNumber", "Numer telefonu został zmieniony " + (Document) result.get());
+                            Toast.makeText(getContext(), "Numer telefonu został zmieniony", Toast.LENGTH_LONG).show();
                         } else {
-                            Log.v("TAG()", "Nie udało się zminić nazwy" + result.getError());
+                            Log.v("changeNumber", "Nie udało się zminić numeru telefonu" + result.getError());
                             Toast.makeText(getContext(), "Wystąpił błąd ", Toast.LENGTH_LONG).show();
                         }
                     });
