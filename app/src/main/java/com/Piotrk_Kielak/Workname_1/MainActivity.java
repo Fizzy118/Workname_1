@@ -27,6 +27,8 @@ import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -48,6 +50,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.bson.Document;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomNavigationView bottomNav;
     private NavController navController;
+    private ImageButton buttonSOS;
 
     //zmienne wykrywania upadku
     private SensorManager mSensorManager;
@@ -97,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private ScheduledExecutorService scheduler;
 
     //odlicza 30min od ostatniego ruchu telefonu
-    public CountDownTimer cdt = new CountDownTimer(1800000, 1000) {
+    public CountDownTimer cdt = new CountDownTimer(3000000, 1000) {
         public void onFinish() {
             sendSms();
             count_cdt = false;
@@ -226,6 +234,12 @@ public class MainActivity extends AppCompatActivity {
         }else{
             requestPermissions(new String[]{Manifest.permission.SEND_SMS},101);
         }
+        //dostęp do statusu telefonu potrzeby aby wysłać sms
+        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+            Log.v("READ_PHONE_STATE", "przyznane");
+        }else{
+            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE},101);
+        }
 
         //kanał powiadomien
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -239,41 +253,21 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LogActivity.class);
             this.startActivity(intent);
         } else {
-                getType();
-
-
-
-
-//          TODO: usunąć
-            //typKonta = true;
-
-//            if(getType() == true){
-//                sendLocalization();
-//
-//                //funkcja pobierająca numery i zapisujaca w zmiennej
-//                functionsManager.callFunctionAsync("getNumber", Collections.singletonList(""), ArrayList.class, (App.Callback) result -> {
-//                    if (result.isSuccess()) {
-//                        Log.v("getNumber", "pobrano numery " + (ArrayList) result.get());
-//                        numerUzytkownika = (ArrayList) result.get();
-//                    } else {
-//                        Log.v("getNumber", "niepobrano numerow " + result.get());
-//                    }
-//                });
-//                //generowanie sensorów jeżeli konto jest podopiecznego
-//                mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-//
-//                mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//                mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-//                if (mGyroscope == null) {
-//                    Log.v("MainActivity", "Gryro null");
-//                }
-//                mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
-//                mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-//
-//                if (mAccelerometr == null) {
-//                    Log.v("MainActivity", "Acc null");
-//                }
-//            }
+            //inicjacja przycisku sos który w razie klikniecia wysyła prośbę o kontakt
+            buttonSOS = findViewById(R.id.imageButton_sos);
+            buttonSOS.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    int a = numerUzytkownika.size();
+                    for (int i = 0; i < a; i++) {
+                        smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Potrzebuję pomocy, zadzwoń do mnie!", null, null);
+                    }
+                    Toast.makeText(getBaseContext(), "Wysłano wiadomość SOS", Toast.LENGTH_LONG).show();
+                }
+            });
+            //sprawdzenie typu użytkownika
+            getType();
 
             //implementacja gornego paska
             toolbar = findViewById(R.id.my_toolbar);
@@ -366,15 +360,17 @@ public class MainActivity extends AppCompatActivity {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    //funkcja wywołująca lokalizacje co określony odstep czasowy (5min)
+    //funkcja wywołująca lokalizacje co określony odstep czasowy określony przez użytkownika
     public void sendLocalization() {
+        Integer time;
+        time = ReadFromFile("timerFile");
         Runnable getterLocalization = () -> getLocalization();
         ScheduledFuture<?> getterHandle =
-                scheduler.scheduleAtFixedRate(getterLocalization, 0, 3, MINUTES);
+                scheduler.scheduleAtFixedRate(getterLocalization, 0, time, MINUTES);
         Log.v("sendLocalization", "wysłane");
     }
 
-    // Funkcja zwracająca typ użytkownika
+    // Funkcja zwracająca typ użytkownika - w przypadku kiedy typ konta == podopieczny, wykonuje funkcję "setForCharge"
     public Boolean getType(){
         this.user = MainActivity.myApp.currentUser();
         Functions functionsManager = MainActivity.myApp.getFunctions(user);
@@ -384,6 +380,8 @@ public class MainActivity extends AppCompatActivity {
                 typKonta = (Boolean) result.get();
                 if(typKonta==true){
                     setForCharge();
+                    //wyświetlenie przycisku sos dla podopiecznego
+                    buttonSOS.setVisibility(View.VISIBLE);
                 }
                 Log.v("MainActivity", "podano typ konta " + typKonta);
 
@@ -393,8 +391,9 @@ public class MainActivity extends AppCompatActivity {
         });
         return  typKonta;
     }
-
+    //Funkcja odpowiedzialna za generowanie sensorów,  wysyłanie lokalizacji do bazy, pobieranie numerów opiekunów - wywoływana tylko w przypadku podopiecznych
     private void setForCharge(){
+            // wysyłanie lokalizacji do bazy danych
             sendLocalization();
             this.user = MainActivity.myApp.currentUser();
             Functions functionsManager = MainActivity.myApp.getFunctions(user);
@@ -407,9 +406,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("getNumber", "niepobrano numerow " + result.get());
                 }
             });
-            //generowanie sensorów jeżeli konto jest podopiecznego
+            //generowanie sensorów
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
             mAccelerometr = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
             if (mGyroscope == null) {
@@ -417,9 +415,28 @@ public class MainActivity extends AppCompatActivity {
             }
             mSensorManager.registerListener(sensorAccEventListner, mAccelerometr, SensorManager.SENSOR_DELAY_NORMAL);
             mSensorManager.registerListener(sensorGyroEventListner, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-
             if (mAccelerometr == null) {
                 Log.v("MainActivity", "Acc null");
             }
+    }
+
+    //funkcja do odczytywania z pliku informacji o częstotliwości wysyłania lokalizacji do bazy danych
+    public int ReadFromFile(String fileName){
+        File path = getApplicationContext().getFilesDir();
+        File readFrom = new File(path, fileName);
+        byte[] content = new byte[(int) readFrom.length()];
+        try {
+            FileInputStream stream = new FileInputStream(readFrom);
+            stream.read(content);
+            Log.v("ReadFromFile", " odczytano");
+            return new BigInteger(content).intValue();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
+
     }
 }

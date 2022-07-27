@@ -8,9 +8,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Collections;
+
 import io.realm.mongodb.App;
 import io.realm.mongodb.User;
+import io.realm.mongodb.functions.Functions;
 
 
 /**
@@ -19,6 +31,9 @@ import io.realm.mongodb.User;
 public class FragUstawienia extends Fragment {
     private io.realm.mongodb.User user;
     private Button button;
+    private Boolean typ;
+    private TextView textView;
+    private NumberPicker numberPicker;
 
     public FragUstawienia() {
         // Required empty public constructor
@@ -37,15 +52,38 @@ public class FragUstawienia extends Fragment {
             this.startActivity(intent);
         }
         else{
-
+            getType();
         }
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        //inicjacja wyglądu fragmentu ustawienia
         View v = inflater.inflate(R.layout.fragment_frag_ustawienia,container,false);
         button= v.findViewById(R.id.buttonwyloguj);
+        textView = v.findViewById(R.id.textView_setTimer_ustawienia);
+        numberPicker = v.findViewById(R.id.numberPicker);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(20);
+        numberPicker.setValue(ReadFromFile("timerFile"));
+
+        numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+            //zapisywanie informacji do pliku
+                File path = getContext().getFilesDir();
+                try {
+                    FileOutputStream writer = new FileOutputStream(new File(path,"timerFile"));
+                    writer.write(newVal);
+                    writer.close();
+                    Log.v("writer", "zapisano do pliku");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         //Funkcja umożliwiająca wylogowywanie
         button.setOnClickListener(new View.OnClickListener() {
@@ -69,5 +107,43 @@ public class FragUstawienia extends Fragment {
             }
         });
         return v;
+    }
+
+    public int ReadFromFile(String fileName){
+        File path = getContext().getFilesDir();
+        File readFrom = new File(path, fileName);
+        byte[] content = new byte[(int) readFrom.length()];
+        try {
+            FileInputStream stream = new FileInputStream(readFrom);
+            stream.read(content);
+            Log.v("ReadFromFile", " odczytano");
+            return new BigInteger(content).intValue();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
+
+    }
+    // Funkcja zwracająca typ użytkownika
+    public void getType(){
+        this.user = MainActivity.myApp.currentUser();
+        Functions functionsManager = MainActivity.myApp.getFunctions(user);
+        functionsManager.callFunctionAsync("getTyp", Collections.singletonList(""), Boolean.class, (App.Callback) result -> {
+            if (result.isSuccess()) {
+                Log.v("FragUstawienia", "gettyp: " + (Boolean) result.get());
+                typ=(Boolean) result.get();
+                if(typ==false) {
+                    textView.setVisibility(View.INVISIBLE);
+                }else{
+                    textView.setText("Okres w bezruchu po którym zostanie wysłana wiadomość ostrzegawcza do opiekuna.");
+                }
+            } else {
+                Log.v("FragUstawienia", "getType Błąd " + result.getError());
+            }
+        });
+
     }
 }
