@@ -73,32 +73,7 @@ public class FragDodaj extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout
         View v = inflater.inflate(R.layout.fragment_frag_dodaj,container,false);
-        button= v.findViewById(R.id.button23);
         editText=v.findViewById(R.id.textinputedittext);
-        ///////////////////////////////////////////////////////////////////////////////test
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-
-                Functions functionsManager = MainActivity.myApp.getFunctions(user);
-                List<String> myList = Arrays.asList("000111");
-               functionsManager.callFunctionAsync("getLocalization", myList, ArrayList.class, (App.Callback) result -> {
-            if (result.isSuccess()) {
-                Log.v("TAG()", "dodano kogos " + (ArrayList) result.get());
-                Toast.makeText(getContext(), "Dodano użytkownika", Toast.LENGTH_LONG).show();
-                ArrayList eee = (ArrayList) result.get();
-                Log.v("TAG()", "dodano kogos " + eee.get(0));
-            } else {
-                Log.v("TAG(1)", "niedodano kogos " + result.get());
-                Toast.makeText(getContext(), "Wystąpił błąd: " + result.getError(), Toast.LENGTH_LONG).show();
-            }
-
-        });
-            }
-        });
-        ///////////////////////////////////////////////////////////////////////////////
 
         //funkcja dodająca uzytkownika
         button2 = v.findViewById(R.id.imageButton);

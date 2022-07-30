@@ -222,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
         //inicjalizacja realm app
         Realm.init(this);
         myApp = new App(new AppConfiguration.Builder(Appid).build());
-        String realmName = "My Project";
         user = myApp.currentUser();
 
         Log.v("onCreate", "fusedLocationClient");

@@ -138,7 +138,7 @@ public class FragUstawienia extends Fragment {
                 if(typ==false) {
                     textView.setVisibility(View.INVISIBLE);
                 }else{
-                    textView.setText("Okres w bezruchu po którym zostanie wysłana wiadomość ostrzegawcza do opiekuna.");
+                    textView.setText("Okres co jaki atualizowana będzie informacja o lokalizacji.");
                 }
             } else {
                 Log.v("FragUstawienia", "getType Błąd " + result.getError());
