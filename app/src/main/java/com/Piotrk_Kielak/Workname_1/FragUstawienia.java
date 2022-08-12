@@ -32,7 +32,7 @@ public class FragUstawienia extends Fragment {
     private io.realm.mongodb.User user;
     private Button button;
     private Boolean typ;
-    private TextView textView;
+    private TextView textView, min;
     private NumberPicker numberPicker;
 
     public FragUstawienia() {
@@ -60,6 +60,7 @@ public class FragUstawienia extends Fragment {
                              Bundle savedInstanceState) {
         //inicjacja wyglądu fragmentu ustawienia
         View v = inflater.inflate(R.layout.fragment_frag_ustawienia,container,false);
+        min=v.findViewById(R.id.textView_Ustaw_min);
         button= v.findViewById(R.id.buttonwyloguj);
         textView = v.findViewById(R.id.textView_setTimer_ustawienia);
         numberPicker = v.findViewById(R.id.numberPicker);
@@ -135,10 +136,10 @@ public class FragUstawienia extends Fragment {
             if (result.isSuccess()) {
                 Log.v("FragUstawienia", "gettyp: " + (Boolean) result.get());
                 typ=(Boolean) result.get();
-                if(typ==false) {
-                    textView.setVisibility(View.INVISIBLE);
-                }else{
-                    textView.setText("Okres co jaki atualizowana będzie informacja o lokalizacji.");
+                if(typ==true) {
+                    textView.setVisibility(View.VISIBLE);
+                    numberPicker.setVisibility(View.VISIBLE);
+                    min.setVisibility(View.VISIBLE);
                 }
             } else {
                 Log.v("FragUstawienia", "getType Błąd " + result.getError());

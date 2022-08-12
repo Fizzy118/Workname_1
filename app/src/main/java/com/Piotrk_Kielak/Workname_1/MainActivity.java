@@ -104,17 +104,6 @@ public class MainActivity extends AppCompatActivity {
     private double longitude = 0;
     private ScheduledExecutorService scheduler;
 
-    //odlicza 30min od ostatniego ruchu telefonu
-    public CountDownTimer cdt = new CountDownTimer(3000000, 1000) {
-        public void onFinish() {
-            sendSms();
-            count_cdt = false;
-        }
-
-        public void onTick(long millisUntilFinished) {
-            Log.v("tag", String.valueOf(millisUntilFinished / 1000));
-        }
-    };
 
     //odlicza czas po spełnienu warunku akcelerometru
     public CountDownTimer fall_timer = new CountDownTimer(3000, 1000) {
@@ -179,14 +168,6 @@ public class MainActivity extends AppCompatActivity {
             if (accelerationCurrentValue < 4.5) {
                 Log.v("tag", "acc < 4.5");
                 fall_timer.start();
-            }
-
-            if (accelerationCurrentValue < 9 || accelerationCurrentValue > 10) {
-                Log.v("tag", "wykryto ruch, reset timera");
-                count_cdt = false;
-                cdt.cancel();
-                cdt.start();
-                count_cdt = true;
             }
         }
 
@@ -260,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                     SmsManager smsManager = SmsManager.getDefault();
                     int a = numerUzytkownika.size();
                     for (int i = 0; i < a; i++) {
-                        smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Potrzebuję pomocy, zadzwoń do mnie!", null, null);
+                        smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Potrzebuję pomocy, zadzwoń do mnie!\r\n https://www.google.com/maps/search/?api=1&query="+latitude+"%2C"+longitude, null, null);
                     }
                     Toast.makeText(getBaseContext(), "Wysłano wiadomość SOS", Toast.LENGTH_LONG).show();
                 }
@@ -297,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         int a = numerUzytkownika.size();
         for (int i = 0; i < a; i++) {
             smsManager.sendTextMessage((String) numerUzytkownika.get(i), null, "Wykryto potencjalne zagrożenie." +
-                    " Skontaktuj się z użytkownikiem tego numeru", null, null);
+                    " Skontaktuj się z użytkownikiem tego numeru\r\n https://www.google.com/maps/search/?api=1&query="+latitude+"%2C"+longitude, null, null);
         }
         Toast.makeText(this, "Wysłano powiadomienie do opiekuna", Toast.LENGTH_LONG).show();
     }
